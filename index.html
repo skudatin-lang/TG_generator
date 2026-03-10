@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WYMOR · TG Генератор</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geologica:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #07070a;
+  --s1:     #0e0e14;
+  --s2:     #141420;
+  --s3:     #1c1c2c;
+  --line:   #1e1e2e;
+  --line2:  #2a2a3e;
+  --r:      #ff3355;
+  --r2:     #ff6535;
+  --g:      #00e5a0;
+  --b:      #4488ff;
+  --y:      #ffd166;
+  --text:   #eeeaf8;
+  --mid:    #b0acd0;
+  --dim:    #6060a0;
+  --mono:   'JetBrains Mono', monospace;
+  --body:   'Geologica', sans-serif;
+  --head:   'Bebas Neue', sans-serif;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* noise */
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  opacity:.018;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px;
+}
+
+/* ── LAYOUT ── */
+.app { display:grid; grid-template-columns:260px 1fr; min-height:100vh; position:relative; z-index:1; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--s1);
+  border-right: 1px solid var(--line);
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh;
+  overflow-y:auto;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--line);
+  display:flex; align-items:center; gap:10px;
+}
+
+.logo-mark {
+  font-family: var(--head);
+  font-size: 22px; letter-spacing:3px;
+  background: linear-gradient(90deg, var(--r), var(--r2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+.logo-badge {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing:2px;
+  color: var(--dim); text-transform:uppercase;
+  border: 1px solid var(--line2);
+  border-radius:4px; padding:2px 7px;
+}
+
+.sidebar-section-label {
+  font-family: var(--mono);
+  font-size: 10px; color: var(--dim);
+  letter-spacing: 3px; text-transform:uppercase;
+  padding: 20px 20px 8px;
+}
+
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding: 10px 20px;
+  cursor:pointer; transition: background .15s;
+  border-left: 2px solid transparent;
+  position:relative;
+}
+.nav-item:hover { background: var(--s2); }
+.nav-item.active {
+  background: var(--s2);
+  border-left-color: var(--r);
+}
+
+.nav-item-icon { font-size:16px; width:20px; text-align:center; flex-shrink:0; }
+.nav-item-text { font-size:14px; font-weight:500; }
+.nav-item-text small { display:block; font-size:11px; color:var(--dim); font-weight:400; margin-top:1px; }
+
+.nav-item.locked .nav-item-text { color:var(--dim); }
+.nav-lock {
+  margin-left:auto; font-size:11px;
+  background: var(--s3); border:1px solid var(--line2);
+  border-radius:4px; padding:2px 6px;
+  font-family:var(--mono); color:var(--dim);
+  letter-spacing:1px;
+}
+
+.sidebar-divider { height:1px; background:var(--line); margin:8px 0; }
+
+/* API блок */
+.api-block {
+  margin-top:auto;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.api-block-title {
+  font-family:var(--mono); font-size:10px;
+  color:var(--dim); letter-spacing:2px; text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+.api-input {
+  width:100%; background:var(--s2);
+  border:1px solid var(--line2); border-radius:6px;
+  padding:8px 10px; color:var(--text);
+  font-family:var(--mono); font-size:11px;
+  margin-bottom:6px; outline:none;
+  transition:border-color .15s;
+}
+.api-input:focus { border-color:var(--r); }
+.api-input::placeholder { color:var(--dim); }
+
+.api-status {
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--mono); font-size:10px; color:var(--dim);
+}
+.status-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--dim); flex-shrink:0;
+  transition:background .3s;
+}
+.status-dot.online { background:var(--g); box-shadow:0 0 6px var(--g); }
+
+/* ── MAIN ── */
+.main {
+  display:flex; flex-direction:column;
+  min-height:100vh;
+}
+
+.topbar {
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+  background: rgba(7,7,10,.9);
+  backdrop-filter:blur(20px);
+  position:sticky; top:0; z-index:50;
+}
+
+.topbar-title {
+  display:flex; align-items:center; gap:12px;
+}
+
+.topbar-icon { font-size:20px; }
+
+.topbar-name {
+  font-size:17px; font-weight:700;
+}
+
+.topbar-sub {
+  font-size:12px; color:var(--dim);
+  font-family:var(--mono); margin-top:1px;
+}
+
+.topbar-right { display:flex; gap:10px; align-items:center; }
+
+.step-indicator {
+  display:flex; align-items:center; gap:6px;
+}
+
+.step-dot {
+  width:28px; height:28px; border-radius:50%;
+  border: 1px solid var(--line2);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:11px; color:var(--dim);
+  transition:all .3s;
+}
+.step-dot.done { background:rgba(0,229,160,.1); border-color:var(--g); color:var(--g); }
+.step-dot.active { background:rgba(255,51,85,.1); border-color:var(--r); color:var(--r); }
+.step-line { width:20px; height:1px; background:var(--line2); }
+
+/* ── CONTENT ── */
+.content { padding:32px; flex:1; max-width:860px; }
+
+/* ── STEP PANELS ── */
+.step-panel { display:none; }
+.step-panel.active { display:block; }
+
+.panel-heading {
+  margin-bottom:28px;
+}
+
+.panel-eyebrow {
+  font-family:var(--mono); font-size:11px;
+  color:var(--r); letter-spacing:3px; text-transform:uppercase;
+  margin-bottom:8px;
+  display:flex; align-items:center; gap:10px;
+}
+.panel-eyebrow::after { content:''; width:32px; height:1px; background:var(--r); opacity:.4; }
+
+.panel-title {
+  font-size:26px; font-weight:700; line-height:1.2;
+  margin-bottom:8px;
+}
+
+.panel-sub {
+  font-size:15px; color:var(--mid); line-height:1.6;
+}
+
+/* ── STYLE GRID ── */
+.style-grid {
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:8px; margin-bottom:28px;
+}
+
+.style-card {
+  background:var(--s1); border:1px solid var(--line);
+  border-radius:10px; padding:14px 12px;
+  cursor:pointer; transition:all .15s;
+  position:relative; overflow:hidden;
+}
+.style-card::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, var(--r), var(--r2));
+  opacity:0; transition:opacity .15s;
+}
+.style-card:hover { border-color:var(--line2); transform:translateY(-1px); }
+.style-card.selected {
+  border-color:var(--r);
+  background: linear-gradient(135deg, rgba(255,51,85,.12), rgba(255,101,53,.05));
+}
+
+.style-emoji { font-size:22px; margin-bottom:8px; position:relative; }
+.style-name { font-size:13px; font-weight:700; margin-bottom:3px; position:relative; }
+.style-desc { font-size:11px; color:var(--dim); line-height:1.4; position:relative; }
+
+/* ── FORM FIELDS ── */
+.field-group { margin-bottom:20px; }
+
+.field-label {
+  font-family:var(--mono); font-size:11px;
+  color:var(--mid); letter-spacing:1px; text-transform:uppercase;
+  margin-bottom:8px; display:block;
+}
+
+.field-label span { color:var(--r); margin-left:3px; }
+
+textarea, input[type=text] {
+  width:100%; background:var(--s1);
+  border:1px solid var(--line2); border-radius:10px;
+  padding:14px 16px; color:var(--text);
+  font-family:var(--body); font-size:15px;
+  line-height:1.6; resize:vertical; outline:none;
+  transition:border-color .15s, background .15s;
+}
+textarea:focus, input[type=text]:focus {
+  border-color:var(--r);
+  background:var(--s2);
+}
+textarea::placeholder, input::placeholder { color:var(--dim); }
+
+textarea { min-height:120px; }
+
+.char-count {
+  text-align:right; font-family:var(--mono);
+  font-size:11px; color:var(--dim); margin-top:4px;
+}
+.char-count.warn { color:var(--y); }
+.char-count.over { color:var(--r); }
+
+/* ── CHIPS ── */
+.chip-row {
+  display:flex; flex-wrap:wrap; gap:6px;
+  margin-bottom:6px;
+}
+
+.chip {
+  font-family:var(--mono); font-size:11px;
+  padding:5px 12px; border-radius:6px;
+  border:1px solid var(--line2); color:var(--dim);
+  cursor:pointer; transition:all .12s;
+  user-select:none;
+}
+.chip:hover { border-color:var(--line2); color:var(--mid); }
+.chip.on {
+  background:rgba(255,51,85,.1);
+  border-color:var(--r); color:var(--r);
+}
+
+.chip.tone-chip { border-radius:20px; }
+
+/* ── USER EXAMPLES ── */
+.examples-block {
+  background:var(--s1); border:1px solid var(--line);
+  border-radius:12px; padding:20px;
+  margin-bottom:20px;
+}
+
+.examples-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+
+.examples-title {
+  font-size:14px; font-weight:700;
+  display:flex; align-items:center; gap:8px;
+}
+
+.examples-badge {
+  font-family:var(--mono); font-size:9px;
+  padding:3px 8px; border-radius:4px;
+  background:rgba(68,136,255,.1);
+  border:1px solid rgba(68,136,255,.25);
+  color:var(--b); letter-spacing:1px;
+}
+
+.examples-toggle {
+  font-family:var(--mono); font-size:11px;
+  color:var(--dim); cursor:pointer;
+  padding:4px 10px; border:1px solid var(--line2);
+  border-radius:6px; transition:all .15s;
+  background:transparent;
+}
+.examples-toggle:hover { border-color:var(--b); color:var(--b); }
+
+.examples-body { display:none; }
+.examples-body.open { display:block; }
+
+.examples-mode {
+  display:flex; gap:6px; margin-bottom:14px;
+}
+
+.mode-btn {
+  flex:1; padding:8px; border-radius:8px;
+  border:1px solid var(--line2); background:transparent;
+  color:var(--dim); font-family:var(--mono); font-size:11px;
+  cursor:pointer; transition:all .15s; text-align:center;
+}
+.mode-btn.active { border-color:var(--b); color:var(--b); background:rgba(68,136,255,.08); }
+
+.example-item {
+  position:relative; margin-bottom:10px;
+}
+
+.example-textarea {
+  min-height:80px; font-size:13px;
+  padding:12px 40px 12px 14px;
+}
+
+.example-remove {
+  position:absolute; top:8px; right:8px;
+  width:24px; height:24px; border-radius:4px;
+  background:var(--s3); border:none;
+  color:var(--dim); cursor:pointer;
+  font-size:14px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .15s;
+}
+.example-remove:hover { background:rgba(255,51,85,.2); color:var(--r); }
+
+.add-example-btn {
+  width:100%; padding:10px;
+  border:1px dashed var(--line2); border-radius:8px;
+  background:transparent; color:var(--dim);
+  font-family:var(--mono); font-size:11px;
+  cursor:pointer; transition:all .15s;
+  margin-top:4px;
+}
+.add-example-btn:hover { border-color:var(--b); color:var(--b); }
+
+.examples-note {
+  font-size:12px; color:var(--dim); line-height:1.5;
+  margin-top:10px; padding-top:10px;
+  border-top:1px solid var(--line);
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  display:inline-flex; align-items:center; gap:10px;
+  padding:14px 28px; border-radius:10px;
+  background:linear-gradient(135deg,var(--r),var(--r2));
+  border:none; color:#fff;
+  font-family:var(--body); font-size:15px; font-weight:700;
+  cursor:pointer; transition:opacity .15s, transform .1s;
+  letter-spacing:.3px;
+}
+.btn-primary:hover { opacity:.88; }
+.btn-primary:active { transform:scale(.98); }
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+.btn-secondary {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:12px 22px; border-radius:10px;
+  border:1px solid var(--line2); background:transparent;
+  color:var(--mid); font-family:var(--body);
+  font-size:14px; font-weight:600; cursor:pointer;
+  transition:all .15s;
+}
+.btn-secondary:hover { border-color:var(--r); color:var(--text); }
+
+.btn-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:24px; }
+
+/* ── ANALYSIS RESULT ── */
+.analysis-card {
+  background:var(--s1); border:1px solid var(--line);
+  border-radius:14px; overflow:hidden;
+  margin-bottom:24px;
+}
+
+.analysis-header {
+  padding:14px 20px;
+  background:var(--s2);
+  border-bottom:1px solid var(--line);
+  display:flex; align-items:center; gap:10px;
+}
+
+.analysis-header-icon { font-size:16px; }
+.analysis-header-title { font-size:14px; font-weight:700; }
+.analysis-header-sub { font-size:12px; color:var(--dim); margin-left:auto; font-family:var(--mono); }
+
+.analysis-body { padding:20px; }
+
+.analysis-row {
+  display:grid; grid-template-columns:140px 1fr;
+  gap:12px; align-items:start;
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+}
+.analysis-row:last-child { border-bottom:none; }
+
+.analysis-key {
+  font-family:var(--mono); font-size:11px;
+  color:var(--dim); letter-spacing:1px; text-transform:uppercase;
+  padding-top:1px;
+}
+
+.analysis-val {
+  font-size:14px; color:var(--text); line-height:1.5;
+}
+
+.analysis-val .tag {
+  display:inline-block; font-family:var(--mono); font-size:10px;
+  padding:2px 8px; border-radius:4px; margin:2px 3px 2px 0;
+  background:rgba(255,51,85,.1); border:1px solid rgba(255,51,85,.2);
+  color:var(--r);
+}
+
+.confirm-bar {
+  background: linear-gradient(135deg, rgba(255,51,85,.08), rgba(255,101,53,.04));
+  border:1px solid rgba(255,51,85,.2);
+  border-radius:10px; padding:16px 20px;
+  display:flex; align-items:center; gap:16px;
+  margin-bottom:24px; flex-wrap:wrap;
+}
+
+.confirm-text { font-size:14px; color:var(--mid); flex:1; line-height:1.5; }
+.confirm-text strong { color:var(--text); }
+
+/* ── RESULT ── */
+.result-card {
+  background:var(--s1); border:1px solid var(--line);
+  border-radius:14px; overflow:hidden;
+}
+
+.result-header {
+  padding:14px 20px;
+  background:var(--s2);
+  border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+.result-header-left { display:flex; align-items:center; gap:10px; }
+.result-style-badge {
+  font-family:var(--mono); font-size:10px;
+  padding:4px 10px; border-radius:6px;
+  background:rgba(255,51,85,.1);
+  border:1px solid rgba(255,51,85,.2); color:var(--r);
+  letter-spacing:1px;
+}
+
+.result-chars {
+  font-family:var(--mono); font-size:11px; color:var(--dim);
+}
+
+.result-body {
+  padding:24px;
+}
+
+.result-text {
+  font-size:16px; line-height:1.75; color:var(--text);
+  white-space:pre-wrap; word-break:break-word;
+}
+
+.result-actions {
+  padding:16px 20px;
+  border-top:1px solid var(--line);
+  display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+}
+
+.copy-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 20px; border-radius:8px;
+  background:linear-gradient(135deg,var(--r),var(--r2));
+  border:none; color:#fff;
+  font-family:var(--body); font-size:13px; font-weight:700;
+  cursor:pointer; transition:opacity .15s;
+}
+.copy-btn:hover { opacity:.85; }
+.copy-btn.copied { background:var(--g); }
+
+.regen-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:10px 18px; border-radius:8px;
+  border:1px solid var(--line2); background:transparent;
+  color:var(--mid); font-family:var(--body);
+  font-size:13px; font-weight:600; cursor:pointer;
+  transition:all .15s;
+}
+.regen-btn:hover { border-color:var(--r); color:var(--text); }
+
+.back-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:10px 18px; border-radius:8px;
+  border:1px solid var(--line2); background:transparent;
+  color:var(--dim); font-family:var(--body);
+  font-size:13px; cursor:pointer; transition:all .15s;
+  margin-left:auto;
+}
+.back-btn:hover { border-color:var(--line2); color:var(--mid); }
+
+/* ── SPINNER ── */
+.spinner {
+  width:16px; height:16px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.2);
+  border-top-color:#fff;
+  animation:spin .7s linear infinite;
+  flex-shrink:0;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── PROCESSING STATE ── */
+.processing-block {
+  display:none; padding:40px 0; text-align:center;
+}
+.processing-block.show { display:block; }
+
+.processing-steps {
+  display:flex; flex-direction:column; gap:12px;
+  max-width:380px; margin:0 auto;
+}
+
+.proc-step {
+  display:flex; align-items:center; gap:14px;
+  padding:12px 16px; border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--s1); text-align:left;
+  transition:all .3s;
+}
+.proc-step.active {
+  border-color:var(--r);
+  background:rgba(255,51,85,.06);
+}
+.proc-step.done {
+  border-color:rgba(0,229,160,.3);
+  background:rgba(0,229,160,.04);
+}
+
+.proc-step-icon {
+  width:32px; height:32px; border-radius:8px;
+  background:var(--s2); display:flex;
+  align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0;
+  transition:all .3s;
+}
+.proc-step.active .proc-step-icon { background:rgba(255,51,85,.15); }
+.proc-step.done .proc-step-icon { background:rgba(0,229,160,.12); }
+
+.proc-step-info {}
+.proc-step-name { font-size:13px; font-weight:700; }
+.proc-step-desc { font-size:12px; color:var(--dim); margin-top:2px; }
+.proc-step.active .proc-step-name { color:var(--r); }
+.proc-step.done .proc-step-name { color:var(--g); }
+
+/* ── ERROR ── */
+.error-box {
+  display:none; padding:14px 16px;
+  background:rgba(255,51,85,.08);
+  border:1px solid rgba(255,51,85,.25);
+  border-radius:10px; color:var(--r);
+  font-size:13px; line-height:1.5;
+  margin-bottom:16px;
+}
+.error-box.show { display:block; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--line2); border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:var(--dim); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px) {
+  .app { grid-template-columns:1fr; }
+  .sidebar { position:fixed; left:-260px; top:0; bottom:0; z-index:200; transition:left .25s; width:260px; }
+  .sidebar.open { left:0; }
+  .style-grid { grid-template-columns:repeat(2,1fr); }
+  .content { padding:20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">WYMOR</div>
+      <div class="logo-badge">BETA</div>
+    </div>
+
+    <div class="sidebar-section-label">Инструменты</div>
+
+    <div class="nav-item active" onclick="switchTool('tg')">
+      <div class="nav-item-icon">✈️</div>
+      <div class="nav-item-text">
+        TG Генератор
+        <small>Бесплатно · без ограничений</small>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-label">Скоро</div>
+
+    <div class="nav-item locked">
+      <div class="nav-item-icon">🤖</div>
+      <div class="nav-item-text">Робот-копирайтер<small>Все платформы</small></div>
+      <div class="nav-lock">PRO</div>
+    </div>
+
+    <div class="nav-item locked">
+      <div class="nav-item-icon">🎬</div>
+      <div class="nav-item-text">Reels Продюсер<small>4 формата</small></div>
+      <div class="nav-lock">PRO</div>
+    </div>
+
+    <div class="nav-item locked">
+      <div class="nav-item-icon">📣</div>
+      <div class="nav-item-text">Авто-постинг<small>Telegram бот</small></div>
+      <div class="nav-lock">PRO</div>
+    </div>
+
+    <div class="nav-item locked">
+      <div class="nav-item-icon">📊</div>
+      <div class="nav-item-text">Аналитика канала<small>Охват, ER, тренды</small></div>
+      <div class="nav-lock">PRO</div>
+    </div>
+
+    <div class="api-block">
+      <div class="api-block-title">YandexGPT API</div>
+      <input class="api-input" id="folderId" placeholder="Folder ID" oninput="checkApi()">
+      <input class="api-input" id="apiKey" placeholder="API Key" type="password" oninput="checkApi()">
+      <div class="api-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusText">Введите ключи</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-title">
+        <div class="topbar-icon">✈️</div>
+        <div>
+          <div class="topbar-name">TG Генератор</div>
+          <div class="topbar-sub">TELEGRAM · БЕСПЛАТНО</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="step-indicator" id="stepIndicator">
+          <div class="step-dot active" id="dot1">1</div>
+          <div class="step-line"></div>
+          <div class="step-dot" id="dot2">2</div>
+          <div class="step-line"></div>
+          <div class="step-dot" id="dot3">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ── ШАГ 1: НАСТРОЙКА ── -->
+      <div class="step-panel active" id="step1">
+
+        <div class="panel-heading">
+          <div class="panel-eyebrow">Шаг 01</div>
+          <div class="panel-title">Выберите стиль и опишите тему</div>
+          <div class="panel-sub">ИИ проанализирует задачу и предложит концепт перед написанием.</div>
+        </div>
+
+        <!-- Выбор стиля -->
+        <div class="field-group">
+          <label class="field-label">Стиль поста <span>*</span></label>
+          <div class="style-grid" id="styleGrid">
+            <div class="style-card selected" onclick="selectStyle(this,'provocation')" data-style="provocation">
+              <div class="style-emoji">🔥</div>
+              <div class="style-name">Провокация</div>
+              <div class="style-desc">Жёсткий тезис, споры, охват</div>
+            </div>
+            <div class="style-card" onclick="selectStyle(this,'aida')" data-style="aida">
+              <div class="style-emoji">💰</div>
+              <div class="style-name">Продающий</div>
+              <div class="style-desc">AIDA, боль → решение → CTA</div>
+            </div>
+            <div class="style-card" onclick="selectStyle(this,'story')" data-style="story">
+              <div class="style-emoji">📖</div>
+              <div class="style-name">Сторителлинг</div>
+              <div class="style-desc">История, герой, поворот</div>
+            </div>
+            <div class="style-card" onclick="selectStyle(this,'expert')" data-style="expert">
+              <div class="style-emoji">🧠</div>
+              <div class="style-name">Экспертный</div>
+              <div class="style-desc">Тезис + данные + вывод</div>
+            </div>
+            <div class="style-card" onclick="selectStyle(this,'irony')" data-style="irony">
+              <div class="style-emoji">😂</div>
+              <div class="style-name">Ирония</div>
+              <div class="style-desc">Абсурд, инструкция, twist</div>
+            </div>
+            <div class="style-card" onclick="selectStyle(this,'news')" data-style="news">
+              <div class="style-emoji">📰</div>
+              <div class="style-name">Новостной</div>
+              <div class="style-desc">Факты, пирамида, источник</div>
+            </div>
+            <div class="style-card" onclick="selectStyle(this,'diary')" data-style="diary">
+              <div class="style-emoji">🎭</div>
+              <div class="style-name">Дневник</div>
+              <div class="style-desc">Исповедь, уязвимость, доверие</div>
+            </div>
+            <div class="style-card" onclick="selectStyle(this,'investigation')" data-style="investigation">
+              <div class="style-emoji">⚡</div>
+              <div class="style-name">Расследование</div>
+              <div class="style-desc">Разоблачение, факты, аномалия</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Тема -->
+        <div class="field-group">
+          <label class="field-label">Тема / материал <span>*</span></label>
+          <textarea id="topicInput" placeholder="Опишите тему своими словами. Можно неформально — факты, мысли, детали, что угодно. ИИ сам найдёт в этом историю." oninput="countChars(this,'topicCount')"></textarea>
+          <div class="char-count" id="topicCount">0 симв.</div>
+        </div>
+
+        <!-- Настройки -->
+        <div class="field-group">
+          <label class="field-label">Тональность</label>
+          <div class="chip-row">
+            <span class="chip tone-chip on" onclick="toggleTone(this)">Нейтральный</span>
+            <span class="chip tone-chip" onclick="toggleTone(this)">Личный</span>
+            <span class="chip tone-chip" onclick="toggleTone(this)">Дерзкий</span>
+            <span class="chip tone-chip" onclick="toggleTone(this)">Мягкий</span>
+            <span class="chip tone-chip" onclick="toggleTone(this)">Деловой</span>
+            <span class="chip tone-chip" onclick="toggleTone(this)">Ироничный</span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Дополнительно</label>
+          <div class="chip-row">
+            <span class="chip on" onclick="this.classList.toggle('on')" data-opt="emoji">Эмодзи</span>
+            <span class="chip on" onclick="this.classList.toggle('on')" data-opt="question">Вопрос в конце</span>
+            <span class="chip" onclick="this.classList.toggle('on')" data-opt="hashtags">Хэштеги</span>
+            <span class="chip on" onclick="this.classList.toggle('on')" data-opt="bold">**Жирный** текст</span>
+            <span class="chip" onclick="this.classList.toggle('on')" data-opt="cta">Призыв к действию</span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Целевая аудитория</label>
+          <input type="text" id="audienceInput" placeholder="Например: предприниматели, авторы Telegram-каналов, маркетологи...">
+        </div>
+
+        <!-- Блок пользовательских примеров -->
+        <div class="examples-block">
+          <div class="examples-header">
+            <div class="examples-title">
+              Примеры вашего стиля
+              <span class="examples-badge">FEW-SHOT</span>
+            </div>
+            <button class="examples-toggle" onclick="toggleExamples()">Добавить ↓</button>
+          </div>
+          <div class="examples-body" id="examplesBody">
+            <div class="examples-mode">
+              <button class="mode-btn active" onclick="setMode(this,'builtin')">Встроенные шаблоны</button>
+              <button class="mode-btn" onclick="setMode(this,'custom')">Мои примеры</button>
+              <button class="mode-btn" onclick="setMode(this,'both')">Оба</button>
+            </div>
+            <div id="customExamplesArea" style="display:none">
+              <div id="examplesList"></div>
+              <button class="add-example-btn" onclick="addExample()">+ Добавить пример поста</button>
+            </div>
+            <div class="examples-note">
+              💡 Добавьте 1–3 своих поста — ИИ изучит ваш стиль и будет писать похоже. Чем точнее примеры, тем точнее результат.
+            </div>
+          </div>
+        </div>
+
+        <div class="error-box" id="error1"></div>
+
+        <div class="btn-row">
+          <button class="btn-primary" onclick="runAnalysis()" id="btnAnalyze">
+            <span>Анализировать →</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── ШАГ 2: АНАЛИЗ ── -->
+      <div class="step-panel" id="step2">
+
+        <div class="panel-heading">
+          <div class="panel-eyebrow">Шаг 02</div>
+          <div class="panel-title">Проверьте концепт</div>
+          <div class="panel-sub">ИИ разобрал вашу тему. Убедитесь что концепт верный — и запускайте генерацию.</div>
+        </div>
+
+        <!-- Processing -->
+        <div class="processing-block" id="processing1">
+          <div class="processing-steps">
+            <div class="proc-step active" id="proc-analyze">
+              <div class="proc-step-icon">🔍</div>
+              <div class="proc-step-info">
+                <div class="proc-step-name">Анализирую тему</div>
+                <div class="proc-step-desc">Ищу главную мысль и аудиторию</div>
+              </div>
+            </div>
+            <div class="proc-step" id="proc-concept">
+              <div class="proc-step-icon">💡</div>
+              <div class="proc-step-info">
+                <div class="proc-step-name">Формирую концепт</div>
+                <div class="proc-step-desc">Угол, структура, ключевая идея</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analysis result -->
+        <div id="analysisResult" style="display:none">
+
+          <div class="analysis-card">
+            <div class="analysis-header">
+              <div class="analysis-header-icon">🔍</div>
+              <div class="analysis-header-title">Результат анализа</div>
+              <div class="analysis-header-sub" id="analysisStyle">—</div>
+            </div>
+            <div class="analysis-body" id="analysisBody"></div>
+          </div>
+
+          <div class="confirm-bar">
+            <div class="confirm-text">
+              <strong>Концепт верный?</strong> Если да — запускайте генерацию. Если нет — вернитесь и уточните тему.
+            </div>
+            <button class="btn-secondary" onclick="goStep(1)">← Изменить</button>
+            <button class="btn-primary" onclick="runGeneration()" id="btnGenerate">
+              <span>Написать пост →</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ── ШАГ 3: РЕЗУЛЬТАТ ── -->
+      <div class="step-panel" id="step3">
+
+        <div class="panel-heading">
+          <div class="panel-eyebrow">Шаг 03</div>
+          <div class="panel-title">Готовый пост</div>
+          <div class="panel-sub">Скопируйте и опубликуйте. Или перегенерируйте — каждый раз текст будет новым.</div>
+        </div>
+
+        <!-- Processing -->
+        <div class="processing-block" id="processing2">
+          <div class="processing-steps">
+            <div class="proc-step active" id="proc-write">
+              <div class="proc-step-icon">✍️</div>
+              <div class="proc-step-info">
+                <div class="proc-step-name">Пишу пост</div>
+                <div class="proc-step-desc">Применяю стиль и структуру</div>
+              </div>
+            </div>
+            <div class="proc-step" id="proc-polish">
+              <div class="proc-step-icon">✨</div>
+              <div class="proc-step-info">
+                <div class="proc-step-name">Полирую текст</div>
+                <div class="proc-step-desc">Проверяю ритм и финал</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div id="postResult" style="display:none">
+          <div class="result-card">
+            <div class="result-header">
+              <div class="result-header-left">
+                <div class="result-style-badge" id="resultStyleBadge">—</div>
+                <div class="result-chars" id="resultChars">0 симв.</div>
+              </div>
+            </div>
+            <div class="result-body">
+              <div class="result-text" id="resultText"></div>
+            </div>
+            <div class="result-actions">
+              <button class="copy-btn" id="copyBtn" onclick="copyPost()">📋 Копировать</button>
+              <button class="regen-btn" onclick="runGeneration()">↺ Новый вариант</button>
+              <button class="back-btn" onclick="goStep(1)">← Новый пост</button>
+            </div>
+          </div>
+          <div class="error-box" id="error3" style="margin-top:12px"></div>
+        </div>
+
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let currentStep = 1;
+let currentStyle = 'provocation';
+let examplesMode = 'builtin';
+let exampleCount = 0;
+let lastAnalysis = null;
+
+// ═══════════════════════════════════════════════
+//  STYLE DEFINITIONS
+// ═══════════════════════════════════════════════
+const STYLES = {
+  provocation: {
+    name: '🔥 Провокация',
+    systemPrompt: `Ты — дерзкий медиаавтор, пишешь посты для Telegram.
+Задача: написать провокационный пост.
+Требования:
+— Первое предложение = жёсткий неочевидный тезис (1-2 строки)
+— Никаких смягчений: «кажется», «может быть» — запрещено
+— Короткие абзацы по 1-3 предложения
+— Финал: либо острый вопрос, либо ещё более сильный вывод
+— Тон: уверенный, почти агрессивный, без извинений
+— СТРОГО 700-950 знаков — не меньше, не больше
+— Без заголовков и подзаголовков`
+  },
+  aida: {
+    name: '💰 Продающий',
+    systemPrompt: `Ты — копирайтер с опытом 10 лет. Пишешь продающие посты для Telegram.
+Используй структуру AIDA: Внимание → Интерес → Желание → Действие.
+Требования:
+— Первая строка: удар в боль или яркий желанный образ
+— Обращение на «ты»
+— Конкретные цифры или сроки если есть
+— Один CTA в конце, не больше
+— СТРОГО 700-950 знаков — не меньше, не больше
+— Без заголовков`
+  },
+  story: {
+    name: '📖 Сторителлинг',
+    systemPrompt: `Ты — журналист-сторителлер. Пишешь пост для Telegram в жанре личной истории.
+Требования:
+— Начать с конкретного момента (не с предыстории), сразу in medias res
+— Есть конфликт или неожиданный поворот
+— Минимум одна конкретная деталь (место, предмет, реплика)
+— Читатель должен узнать себя
+— Вывод — в последних 2-3 предложениях, ненавязчиво
+— Стиль: живой, разговорный, без официоза
+— СТРОГО 700-950 знаков — не меньше, не больше`
+  },
+  expert: {
+    name: '🧠 Экспертный',
+    systemPrompt: `Ты — эксперт-аналитик. Пишешь экспертный пост для Telegram.
+Требования:
+— Начать с тезиса, не с вводного абзаца
+— Подкрепить конкретным фактом, цифрой или кейсом
+— Объяснить механизм: почему так происходит
+— Финал: что это значит практически для читателя
+— Тон: уверенный, деловой, без снисхождения
+— СТРОГО 700-950 знаков — не меньше, не больше`
+  },
+  irony: {
+    name: '😂 Ирония',
+    systemPrompt: `Ты — сатирик, пишешь иронические посты для Telegram.
+Стиль: узнаваемая ситуация, доведённая до абсурда.
+Требования:
+— Формат: «инструкция», «как стать», «N признаков» или короткая сцена
+— Детали должны быть узнаваемыми (конкретные слова, ситуации)
+— Финальная строка — неожиданный поворот или острый вывод
+— НЕ объяснять иронию — если надо объяснить, удалить
+— Тон: иронично-серьёзный (как будто всё правда)
+— СТРОГО 600-850 знаков — не меньше, не больше`
+  },
+  news: {
+    name: '📰 Новостной',
+    systemPrompt: `Ты — новостной редактор Telegram-канала. Пишешь чёткий новостной пост.
+Требования:
+— Первое предложение = суть события (кто, что, когда)
+— Только факты, без домыслов
+— Если есть мнение — явно пометить «по данным X» или «эксперты считают»
+— Контекст — в последнем абзаце
+— Тон: нейтральный, информативный
+— СТРОГО 500-750 знаков — не меньше, не больше`
+  },
+  diary: {
+    name: '🎭 Дневник',
+    systemPrompt: `Ты — автор личного Telegram-канала. Пишешь исповедальный пост.
+Требования:
+— Начать с конкретного момента, не с вывода
+— Показать уязвимость или сомнение (не победу)
+— Один центральный образ или деталь
+— Темп медленный, разговорный
+— Вывод мягкий или вовсе открытый финал
+— Тон: тихий, честный, без пафоса
+— СТРОГО 700-950 знаков — не меньше, не больше`
+  },
+  investigation: {
+    name: '⚡ Расследование',
+    systemPrompt: `Ты — журналист-расследователь. Пишешь разоблачительный пост для Telegram.
+Требования:
+— Начать с сильного тезиса-аномалии
+— Выстроить цепочку: заявление → факт → факт → вывод
+— Ссылаться на источники явно
+— Не делать выводов шире, чем позволяют данные
+— Тон: сухой, доказательный, без лишних эмоций
+— СТРОГО 750-950 знаков — не меньше, не больше`
+  }
+};
+
+// ═══════════════════════════════════════════════
+//  API
+// ═══════════════════════════════════════════════
+function checkApi() {
+  const key = document.getElementById('apiKey').value;
+  const folder = document.getElementById('folderId').value;
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  const ok = key.length > 10 && folder.length > 5;
+  dot.classList.toggle('online', ok);
+  txt.textContent = ok ? 'Подключено' : 'Введите ключи';
+}
+
+async function callYandex(system, user) {
+  const key = document.getElementById('apiKey').value;
+  const folder = document.getElementById('folderId').value;
+  if (!key || !folder) throw new Error('Введите API ключ и Folder ID');
+
+  const resp = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Api-Key '+key},
+    body: JSON.stringify({
+      modelUri: `gpt://${folder}/yandexgpt/latest`,
+      completionOptions: { stream:false, temperature:0.92, maxTokens:1500 },
+      messages:[
+        {role:'system', text:system},
+        {role:'user', text:user}
+      ]
+    })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(()=>({}));
+    throw new Error(err.error?.message || `Ошибка API: ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.result?.alternatives?.[0]?.message?.text || '';
+}
+
+// ═══════════════════════════════════════════════
+//  STEP NAVIGATION
+// ═══════════════════════════════════════════════
+function goStep(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  currentStep = n;
+  updateStepDots();
+  window.scrollTo(0,0);
+}
+
+function updateStepDots() {
+  for (let i = 1; i <= 3; i++) {
+    const d = document.getElementById('dot' + i);
+    d.className = 'step-dot';
+    if (i < currentStep) d.classList.add('done'), d.textContent = '✓';
+    else if (i === currentStep) d.classList.add('active'), d.textContent = i;
+    else d.textContent = i;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  STYLE SELECT
+// ═══════════════════════════════════════════════
+function selectStyle(el, style) {
+  document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  currentStyle = style;
+}
+
+// ═══════════════════════════════════════════════
+//  TONE
+// ═══════════════════════════════════════════════
+function toggleTone(el) {
+  document.querySelectorAll('.tone-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function getTone() {
+  const el = document.querySelector('.tone-chip.on');
+  return el ? el.textContent : 'Нейтральный';
+}
+
+// ═══════════════════════════════════════════════
+//  OPTIONS
+// ═══════════════════════════════════════════════
+function getOptions() {
+  const opts = [];
+  document.querySelectorAll('[data-opt].on').forEach(c => opts.push(c.dataset.opt));
+  return opts;
+}
+
+function buildOptionsText(opts) {
+  const map = {
+    emoji: 'Используй 1-3 эмодзи уместно',
+    question: 'Заверши вопросом к читателю',
+    hashtags: 'Добавь 3-5 хэштегов в конце',
+    bold: 'Выдели ключевые мысли **жирным**',
+    cta: 'Добавь чёткий призыв к действию'
+  };
+  return opts.map(o => map[o]).filter(Boolean).join('. ');
+}
+
+// ═══════════════════════════════════════════════
+//  EXAMPLES
+// ═══════════════════════════════════════════════
+function toggleExamples() {
+  const body = document.getElementById('examplesBody');
+  const btn = document.querySelector('.examples-toggle');
+  body.classList.toggle('open');
+  btn.textContent = body.classList.contains('open') ? 'Свернуть ↑' : 'Добавить ↓';
+}
+
+function setMode(btn, mode) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  examplesMode = mode;
+  document.getElementById('customExamplesArea').style.display =
+    (mode === 'custom' || mode === 'both') ? 'block' : 'none';
+}
+
+function addExample() {
+  exampleCount++;
+  const id = 'ex_' + exampleCount;
+  const div = document.createElement('div');
+  div.className = 'example-item';
+  div.id = 'item_' + id;
+  div.innerHTML = `
+    <textarea class="example-textarea api-input" id="${id}"
+      placeholder="Вставьте пример вашего поста..."></textarea>
+    <button class="example-remove" onclick="removeExample('item_${id}')">×</button>`;
+  document.getElementById('examplesList').appendChild(div);
+}
+
+function removeExample(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function getUserExamples() {
+  const texts = [];
+  document.querySelectorAll('.example-textarea').forEach(t => {
+    if (t.value.trim()) texts.push(t.value.trim());
+  });
+  return texts;
+}
+
+function buildExamplesBlock() {
+  const style = STYLES[currentStyle];
+  const userEx = getUserExamples();
+
+  // Встроенные примеры из базы
+  const builtinExamples = {
+    provocation: `Пример поста в стиле провокации:\n«Контент-планы — это способ убедить себя, что ты работаешь.\nПока ты расписываешь рубрики и «прогревы», конкурент просто публикует. Каждый день. Без плана.\nАлгоритм не знает, что у тебя «стратегия». Он видит только: когда последний раз ты был живым.\nХороший контент-план — тот, что в голове. Остальное — прокрастинация в красивой таблице.\nСпорьте.»`,
+    aida: `Пример продающего поста:\n«Ты готовишься к переговорам 3 часа. Потом говоришь 20 минут. И клиент уходит «подумать».\nПроблема не в тебе. Проблема в структуре. Без неё даже сильный аргумент звучит как просьба.\nЗа 2 дня на интенсиве ты разберёшь 6 реальных кейсов и получишь скрипт, который закрывает сделку в 80% случаев.\n15 мест. → Записаться: [ссылка]»`,
+    story: `Пример поста-истории:\n«Клиент позвонил в 23:40. Сказал «просто хотел уточнить».\nЯ ответил. Объяснил. Положил трубку. И подумал: вот я молодец, всегда на связи.\nА потом посмотрел на детей — они уже спали. Я пропустил ужин второй раз за неделю.\n«Всегда на связи» — это не ценность. Это граница, которую ты сам не поставил.\nНа следующий день я написал клиенту, что работаю с 9 до 19. Он ответил: «Окей, понял».\nНичего не сломалось. Кроме моей старой привычки.»`,
+    expert: `Пример экспертного поста:\n«Органический охват в Telegram падает — но не у всех.\nПо данным TGStat за Q4 2024: у каналов с постами длиннее 1500 знаков средний ER выше на 34%, чем у каналов с короткими форматами.\nМеханизм простой: короткий пост не задерживает. Алгоритм видит низкое время чтения → снижает показ.\nЭто не значит «пишите больше». Это значит: каждый пост должен быть достаточно плотным, чтобы дочитали до конца.\nПроверьте свою аналитику: смотрите не на охват, а на процент дочитываний.»`,
+    irony: `Пример иронического поста:\n«Как правильно пройти курс по продуктивности:\n1. Купить курс — это уже +40% к продуктивности.\n2. Скачать приложение для курса.\n3. Скачать приложение для трекинга курса.\n4. Настроить напоминания о курсе.\n5. Посмотреть первый урок.\n6. Понять, что нужен ещё один курс — базовый.\n7. Купить базовый курс.\n8. Написать в заметках: «завтра начну с нуля».\nПоздравляем. Вы освоили продуктивность.»`,
+    news: `Пример новостного поста:\n«ЦБ поднял ключевую ставку до 21% — максимум с 2003 года.\nРешение принято 25 октября. Предыдущее значение: 19%.\nОфициальная причина: инфляция не замедляется, потребительский спрос остаётся высоким.\nЧто дальше: аналитики ожидают сохранение ставки до середины 2025 года.\nИсточник: пресс-релиз Банка России.»`,
+    diary: `Пример поста-дневника:\n«Сегодня утром я удалил 47 черновиков. Некоторые лежали с 2021 года. Начаты, брошены.\n«Допишу потом» — и потом не наступало.\nЯ читал их и не узнавал себя. Или наоборот — узнавал слишком хорошо: тот же страх, что кто-то прочитает и решит, что это мелко.\nВ итоге я ничего не опубликовал. Просто удалил. И стало легче.\nНе знаю, что это значит. Может, что некоторые тексты пишутся не для других.»`,
+    investigation: `Пример поста-расследования:\n«Компания обещала направить 30% прибыли на экологию. Мы проверили. Цифра не сходится.\nПо годовому отчёту: чистая прибыль — 4,2 млрд ₽. На экологические программы потрачено 180 млн ₽. Это 4,3%. Не 30.\nВ PR-материалах за тот же период: «Мы инвестируем в природу треть доходов».\nМы запросили комментарий. Ответа не последовало.\nРазрыв между обещанием и отчётом — 1,08 млрд рублей. Документы — в открытом доступе.»`
+  };
+
+  let block = '';
+
+  if (examplesMode === 'builtin' || examplesMode === 'both') {
+    block += '\n\n' + (builtinExamples[currentStyle] || '');
+  }
+
+  if ((examplesMode === 'custom' || examplesMode === 'both') && userEx.length > 0) {
+    block += '\n\nПримеры постов этого автора (подстройся под стиль):\n';
+    userEx.forEach((ex, i) => { block += `\nПример ${i+1}:\n«${ex}»`; });
+  }
+
+  return block;
+}
+
+// ═══════════════════════════════════════════════
+//  STEP 1 → ANALYSIS
+// ═══════════════════════════════════════════════
+async function runAnalysis() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic) { showError('error1', 'Опишите тему поста'); return; }
+
+  const key = document.getElementById('apiKey').value;
+  const folder = document.getElementById('folderId').value;
+  if (!key || !folder) { showError('error1', 'Введите API ключ и Folder ID в панели слева'); return; }
+
+  hideError('error1');
+
+  const btn = document.getElementById('btnAnalyze');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div><span>Анализирую...</span>';
+
+  goStep(2);
+
+  // Show processing
+  document.getElementById('processing1').classList.add('show');
+  document.getElementById('analysisResult').style.display = 'none';
+
+  const audience = document.getElementById('audienceInput').value.trim();
+  const tone = getTone();
+  const styleName = STYLES[currentStyle].name;
+
+  try {
+    // Step 1 of processing animation
+    await delay(800);
+    setProcStep('proc-analyze', 'done');
+    setProcStep('proc-concept', 'active');
+
+    const system = `Ты — редактор контента. Анализируешь тему и формируешь концепт поста для Telegram.
+Отвечай СТРОГО в формате JSON без markdown, без пояснений.
+Формат:
+{
+  "main_idea": "главная идея поста в 1 предложении",
+  "audience": "целевая аудитория",
+  "angle": "угол подачи — что именно и как говорим",
+  "hook": "первое предложение-хук",
+  "key_detail": "главная деталь/факт которая сделает пост живым",
+  "avoid": "чего избегать в этом посте"
+}`;
+
+    const user = `Тема: ${topic}
+Стиль: ${styleName}
+Тональность: ${tone}
+Аудитория: ${audience || 'определи самостоятельно'}`;
+
+    const raw = await callYandex(system, user);
+    await delay(400);
+    setProcStep('proc-concept', 'done');
+    await delay(300);
+
+    // Parse JSON
+    let analysis;
+    try {
+      const clean = raw.replace(/```json|```/g,'').trim();
+      analysis = JSON.parse(clean);
+    } catch(e) {
+      // fallback if not valid JSON
+      analysis = {
+        main_idea: raw.slice(0,200),
+        audience: audience || 'не определена',
+        angle: '—', hook: '—', key_detail: '—', avoid: '—'
+      };
+    }
+
+    lastAnalysis = analysis;
+
+    // Render
+    document.getElementById('analysisStyle').textContent = styleName;
+    const rows = [
+      ['Главная идея', analysis.main_idea],
+      ['Аудитория', analysis.audience],
+      ['Угол', analysis.angle],
+      ['Хук (первая строка)', analysis.hook],
+      ['Ключевая деталь', analysis.key_detail],
+      ['Избегать', analysis.avoid],
+    ];
+
+    document.getElementById('analysisBody').innerHTML = rows.map(([k,v]) => `
+      <div class="analysis-row">
+        <div class="analysis-key">${k}</div>
+        <div class="analysis-val">${v || '—'}</div>
+      </div>`).join('');
+
+    document.getElementById('processing1').classList.remove('show');
+    document.getElementById('analysisResult').style.display = 'block';
+
+  } catch(e) {
+    document.getElementById('processing1').classList.remove('show');
+    goStep(1);
+    showError('error1', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>Анализировать →</span>';
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  STEP 2 → GENERATION
+// ═══════════════════════════════════════════════
+async function runGeneration() {
+  const btn = document.getElementById('btnGenerate');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div><span>Пишу...</span>';
+
+  goStep(3);
+  document.getElementById('processing2').classList.add('show');
+  document.getElementById('postResult').style.display = 'none';
+
+  const topic = document.getElementById('topicInput').value.trim();
+  const tone = getTone();
+  const opts = getOptions();
+  const optText = buildOptionsText(opts);
+  const audience = document.getElementById('audienceInput').value.trim();
+  const style = STYLES[currentStyle];
+  const examples = buildExamplesBlock();
+
+  try {
+    await delay(600);
+    setProcStep('proc-write', 'done');
+    setProcStep('proc-polish', 'active');
+
+    const analysisContext = lastAnalysis ? `
+Концепт утверждён:
+— Главная идея: ${lastAnalysis.main_idea}
+— Аудитория: ${lastAnalysis.audience}
+— Угол: ${lastAnalysis.angle}
+— Начать с хука: ${lastAnalysis.hook}
+— Ключевая деталь: ${lastAnalysis.key_detail}
+— Избегать: ${lastAnalysis.avoid}` : '';
+
+    const system = `${style.systemPrompt}
+
+Тональность: ${tone}.
+Аудитория: ${audience || 'определи по теме'}.
+${optText ? 'Дополнительно: ' + optText + '.' : ''}
+${examples}
+
+ВАЖНО: текст должен быть уникальным. Добавляй живые детали, неожиданные образы, конкретные примеры — это создаёт разнообразие. Никогда не повторяй структуру буквально.
+Выдай ТОЛЬКО готовый текст поста. Без заголовка, без пояснений, без кавычек вокруг всего текста.`;
+
+    const user = `Тема: ${topic}${analysisContext}`;
+
+    const result = await callYandex(system, user);
+    await delay(500);
+    setProcStep('proc-polish', 'done');
+    await delay(200);
+
+    const clean = result.trim().replace(/^«|»$/g,'').replace(/^"|"$/g,'');
+
+    document.getElementById('resultText').textContent = clean;
+    document.getElementById('resultStyleBadge').textContent = style.name;
+
+    const len = clean.length;
+    const charsEl = document.getElementById('resultChars');
+    charsEl.textContent = `${len} симв.`;
+    charsEl.style.color = len > 1000 ? 'var(--y)' : 'var(--dim)';
+
+    document.getElementById('processing2').classList.remove('show');
+    document.getElementById('postResult').style.display = 'block';
+
+    // reset proc steps for next run
+    resetProcSteps();
+
+  } catch(e) {
+    document.getElementById('processing2').classList.remove('show');
+    document.getElementById('postResult').style.display = 'block';
+    showError('error3', e.message);
+    resetProcSteps();
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>Написать пост →</span>';
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  COPY
+// ═══════════════════════════════════════════════
+function copyPost() {
+  const text = document.getElementById('resultText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Скопировано';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.innerHTML = '📋 Копировать';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════
+function countChars(el, countId) {
+  const len = el.value.length;
+  const el2 = document.getElementById(countId);
+  el2.textContent = len + ' симв.';
+  el2.className = 'char-count' + (len > 950 ? ' over' : len > 800 ? ' warn' : '');
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = '⚠️ ' + msg;
+  el.classList.add('show');
+}
+
+function hideError(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('show');
+}
+
+function setProcStep(id, state) {
+  const el = document.getElementById(id);
+  el.className = 'proc-step ' + state;
+  const icon = el.querySelector('.proc-step-icon');
+  if (state === 'done') icon.textContent = '✓';
+}
+
+function resetProcSteps() {
+  ['proc-analyze','proc-concept','proc-write','proc-polish'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'proc-step';
+    const icons = {'proc-analyze':'🔍','proc-concept':'💡','proc-write':'✍️','proc-polish':'✨'};
+    el.querySelector('.proc-step-icon').textContent = icons[id] || '·';
+  });
+  document.getElementById('proc-analyze') && (document.getElementById('proc-analyze').className = 'proc-step active');
+  document.getElementById('proc-write') && (document.getElementById('proc-write').className = 'proc-step active');
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function switchTool(t) { /* для будущей навигации */ }
+</script>
+</body>
+</html>
