@@ -615,44 +615,12 @@ textarea { min-height:120px; }
 ::-webkit-scrollbar-thumb:hover { background:var(--dim); }
 
 /* ── RESPONSIVE ── */
-/* burger button */
-.burger {
-  display:none; align-items:center; justify-content:center;
-  width:36px; height:36px; border-radius:8px;
-  border:1px solid var(--line2); background:var(--s1);
-  cursor:pointer; flex-shrink:0;
-}
-.burger span { font-size:16px; }
-
-/* overlay */
-.sidebar-overlay {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,.6); z-index:199;
-}
-.sidebar-overlay.show { display:block; }
-
-/* mobile api block inside content */
-.mobile-api {
-  display:none;
-  background:var(--s1); border:1px solid var(--line);
-  border-radius:12px; padding:16px;
-  margin-bottom:20px;
-}
-.mobile-api-title {
-  font-family:var(--mono); font-size:10px;
-  color:var(--dim); letter-spacing:2px;
-  text-transform:uppercase; margin-bottom:10px;
-}
-.mobile-api .api-status { margin-top:6px; }
-
 @media(max-width:900px) {
   .app { grid-template-columns:1fr; }
   .sidebar { position:fixed; left:-260px; top:0; bottom:0; z-index:200; transition:left .25s; width:260px; }
   .sidebar.open { left:0; }
   .style-grid { grid-template-columns:repeat(2,1fr); }
   .content { padding:20px; }
-  .burger { display:flex; }
-  .mobile-api { display:block; }
 }
 </style>
 </head>
@@ -718,12 +686,9 @@ textarea { min-height:120px; }
   <!-- ── MAIN ── -->
   <main class="main">
 
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
-
     <!-- TOPBAR -->
     <div class="topbar">
       <div class="topbar-title">
-        <div class="burger" onclick="toggleSidebar()"><span>☰</span></div>
         <div class="topbar-icon">✈️</div>
         <div>
           <div class="topbar-name">TG Генератор</div>
@@ -746,17 +711,6 @@ textarea { min-height:120px; }
 
       <!-- ── ШАГ 1: НАСТРОЙКА ── -->
       <div class="step-panel active" id="step1">
-
-        <!-- Mobile API block -->
-        <div class="mobile-api">
-          <div class="mobile-api-title">YandexGPT API</div>
-          <input class="api-input" id="folderIdMobile" placeholder="Folder ID" oninput="syncApi('folder')">
-          <input class="api-input" id="apiKeyMobile" placeholder="API Key" type="password" oninput="syncApi('key')">
-          <div class="api-status mobile-api-status">
-            <div class="status-dot" id="statusDotMobile"></div>
-            <span id="statusTextMobile">Введите ключи</span>
-          </div>
-        </div>
 
         <div class="panel-heading">
           <div class="panel-eyebrow">Шаг 01</div>
@@ -1121,7 +1075,7 @@ async function callYandex(system, user) {
   const folder = document.getElementById('folderId').value;
   if (!key || !folder) throw new Error('Введите API ключ и Folder ID');
 
-  const resp = await fetch('https://llm.api.cloud.yandex.net/foundationModels/v1/completion', {
+  const resp = await fetch('https://fast-ant-34.skudatin-lang.dev.deno.co', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Api-Key '+key},
     body: JSON.stringify({
@@ -1516,53 +1470,6 @@ function resetProcSteps() {
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function switchTool(t) { /* для будущей навигации */ }
-
-// ── MOBILE SIDEBAR ──
-function toggleSidebar() {
-  const s = document.getElementById('sidebar');
-  const o = document.getElementById('sidebarOverlay');
-  s.classList.toggle('open');
-  o.classList.toggle('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
-}
-
-// ── MOBILE API SYNC ──
-// Синхронизирует мобильные поля с десктопными и наоборот
-function syncApi(field) {
-  if (field === 'folder') {
-    const v = document.getElementById('folderIdMobile').value;
-    document.getElementById('folderId').value = v;
-  } else {
-    const v = document.getElementById('apiKeyMobile').value;
-    document.getElementById('apiKey').value = v;
-  }
-  checkApi();
-}
-
-// Переопределяем checkApi чтобы обновлял оба индикатора
-const _origCheckApi = checkApi;
-checkApi = function() {
-  const key = document.getElementById('apiKey').value ||
-              document.getElementById('apiKeyMobile').value;
-  const folder = document.getElementById('folderId').value ||
-                 document.getElementById('folderIdMobile').value;
-  // Sync values
-  if (document.getElementById('apiKeyMobile').value !== key)
-    document.getElementById('apiKeyMobile').value = key;
-  if (document.getElementById('folderIdMobile').value !== folder)
-    document.getElementById('folderIdMobile').value = folder;
-  const ok = key.length > 10 && folder.length > 5;
-  document.getElementById('statusDot').classList.toggle('online', ok);
-  document.getElementById('statusText').textContent = ok ? 'Подключено' : 'Введите ключи';
-  const dm = document.getElementById('statusDotMobile');
-  const tm = document.getElementById('statusTextMobile');
-  if (dm) dm.classList.toggle('online', ok);
-  if (tm) tm.textContent = ok ? 'Подключено' : 'Введите ключи';
-}
-
 </script>
 </body>
 </html>
