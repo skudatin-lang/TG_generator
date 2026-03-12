@@ -615,25 +615,12 @@ textarea { min-height:120px; }
 ::-webkit-scrollbar-thumb:hover { background:var(--dim); }
 
 /* ── RESPONSIVE ── */
-.burger {
-  display:none; align-items:center; justify-content:center;
-  width:36px; height:36px; border-radius:8px;
-  border:1px solid var(--line2); background:var(--s1);
-  cursor:pointer; flex-shrink:0; margin-right:4px;
-}
-.burger span { font-size:18px; line-height:1; }
-.sidebar-overlay {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,.6); z-index:199;
-}
-.sidebar-overlay.show { display:block; }
 @media(max-width:900px) {
   .app { grid-template-columns:1fr; }
   .sidebar { position:fixed; left:-260px; top:0; bottom:0; z-index:200; transition:left .25s; width:260px; }
   .sidebar.open { left:0; }
   .style-grid { grid-template-columns:repeat(2,1fr); }
   .content { padding:20px; }
-  .burger { display:flex; }
 }
 </style>
 </head>
@@ -659,6 +646,13 @@ textarea { min-height:120px; }
     </div>
 
     <div class="sidebar-divider"></div>
+    <div style="padding:14px 18px;border-top:1px solid var(--line);margin-top:auto">
+      <div style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:#00e5a0">
+        <div style="width:6px;height:6px;border-radius:50%;background:#00e5a0;box-shadow:0 0 6px #00e5a0"></div>
+        YandexGPT подключён
+      </div>
+    </div>
+
     <div class="sidebar-section-label">Скоро</div>
 
     <div class="nav-item locked">
@@ -685,16 +679,15 @@ textarea { min-height:120px; }
       <div class="nav-lock">PRO</div>
     </div>
 
+
   </aside>
 
   <!-- ── MAIN ── -->
   <main class="main">
 
     <!-- TOPBAR -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
     <div class="topbar">
       <div class="topbar-title">
-        <div class="burger" onclick="toggleSidebar()"><span>☰</span></div>
         <div class="topbar-icon">✈️</div>
         <div>
           <div class="topbar-name">TG Генератор</div>
@@ -1066,17 +1059,19 @@ const STYLES = {
 // ═══════════════════════════════════════════════
 //  API
 // ═══════════════════════════════════════════════
+
+
 async function callYandex(system, user) {
   const resp = await fetch('https://fast-ant-34.skudatin-lang.dev.deno.co', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
-      modelUri: 'gpt://FOLDER_PLACEHOLDER/yandexgpt/latest',
+      modelUri: 'gpt://placeholder/yandexgpt/latest',
       completionOptions: { stream:false, temperature:0.92, maxTokens:1500 },
       messages:[
         {role:'system', text:system},
         {role:'user', text:user}
-      ]
+      ],
     })
   });
   if (!resp.ok) {
@@ -1230,6 +1225,8 @@ function buildExamplesBlock() {
 async function runAnalysis() {
   const topic = document.getElementById('topicInput').value.trim();
   if (!topic) { showError('error1', 'Опишите тему поста'); return; }
+
+
 
   hideError('error1');
 
@@ -1457,16 +1454,7 @@ function resetProcSteps() {
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-function switchTool(t) {}
-
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('show');
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
-}
+function switchTool(t) { /* для будущей навигации */ }
 </script>
 </body>
 </html>
