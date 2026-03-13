@@ -1290,7 +1290,7 @@ function makePDF() {
     'body{font-family:"Geologica",sans-serif;background:#fff;color:#1a1a1a;font-size:13px;line-height:1.6;}'+
 
     /* Cover */
-    '.cover{background:#07070a;color:#fff;padding:60px 48px;min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;page-break-after:always;}'+
+    '.cover{background:#07070a;color:#fff;padding:60px 48px;height:297mm;display:flex;flex-direction:column;justify-content:space-between;page-break-after:always;}'+
     '.cover-brand{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#6060a0;font-family:"JetBrains Mono",monospace;}'+
     '.cover-line{width:40px;height:3px;background:linear-gradient(90deg,#ff3355,#ff6535);margin:20px 0;}'+
     '.cover-title{font-size:52px;font-weight:900;line-height:1.05;letter-spacing:-2px;}'+
@@ -1301,7 +1301,7 @@ function makePDF() {
     '.cover-date{font-size:11px;color:#3a3a5a;font-family:"JetBrains Mono",monospace;}'+
 
     /* Content */
-    '.content{padding:40px 48px;max-width:720px;margin:0 auto;}'+
+    '.content{padding:28px 40px;max-width:720px;margin:0 auto;}'+
     '.section{border:1px solid #e8e8ee;border-left:4px solid #ccc;border-radius:8px;margin-bottom:20px;overflow:hidden;page-break-inside:avoid;}'+
     '.section-head{display:flex;align-items:center;gap:12px;padding:14px 18px;}'+
     '.section-ico{font-size:20px;width:36px;text-align:center;}'+
@@ -1334,7 +1334,7 @@ function makePDF() {
     '.point-text{font-size:14px;font-weight:700;margin-bottom:8px;line-height:1.4;}'+
 
     /* Checklist page */
-    '.checklist-page{padding:40px 48px;max-width:720px;margin:0 auto;page-break-before:always;}'+
+    '.checklist-page{padding:28px 40px;max-width:720px;margin:0 auto;page-break-before:always;}'+
     '.checklist-title{font-size:24px;font-weight:900;letter-spacing:-1px;margin-bottom:6px;}'+
     '.checklist-sub{font-size:13px;color:#9090b0;margin-bottom:24px;}'+
     '.rule{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border-radius:6px;margin-bottom:8px;background:#f8f8fc;border:1px solid #e8e8ee;}'+
@@ -1344,9 +1344,19 @@ function makePDF() {
 
     '.footer{font-size:10px;color:#c0c0d0;text-align:center;padding:20px;font-family:"JetBrains Mono",monospace;}'+
 
+    '@page{margin:0;size:A4;}'+
     '@media print{'+
       'body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
-      '.cover{min-height:auto;padding:48px;}'+
+      '.cover{height:297mm;padding:48px 48px 40px;}'+
+      '.content{padding:24px 40px;}'+
+      '.checklist-page{padding:24px 40px;}'+
+      '.section{margin-bottom:12px;}'+
+      '.section-body{padding:12px 16px;}'+
+      '.field{margin-bottom:10px;}'+
+      '.field-val{padding:9px 12px;}'+
+      '.prod{margin-top:8px;padding-top:8px;}'+
+      '.prod-row{margin-bottom:4px;}'+
+      '.point{margin-bottom:10px;padding-bottom:10px;}'+
     '}'+
   '</style></head><body>'+
 
