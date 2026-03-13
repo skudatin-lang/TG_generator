@@ -1219,114 +1219,219 @@ function toggleSS(i) {
   a.textContent = b.classList.contains('closed') ? '▸' : '▾';
 }
 
-// ─── PDF ──────────────────────────────────────────
+// ─── PDF (HTML print) ─────────────────────────────
 function makePDF() {
   if(!currentScript){ toast('Сначала сгенерируй сценарий'); return; }
-  // Load jsPDF on demand
-  if(!window.jspdf) {
-    toast('Загружаю PDF-библиотеку...');
-    var s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    s.onload = function(){ buildPDF(); };
-    s.onerror = function(){ toast('Ошибка загрузки PDF. Проверь интернет.'); };
-    document.head.appendChild(s);
-  } else {
-    buildPDF();
-  }
-}
-
-function buildPDF() {
-  if(!currentScript){ toast('Сначала сгенерируй сценарий'); return; }
   var s = currentScript;
-  var jsPDF = window.jspdf.jsPDF;
-  var doc = new jsPDF({unit:'mm',format:'a4'});
-  var W=210, M=17, TW=W-M*2, y=16;
+  var hook = s.hook || {};
+  var amp  = s.amp  || {};
+  var conc = s.conclusion || {};
+  var pts  = s.points || [];
+  var topic = gval('topicInput') || '';
+  var dur   = grad('dur') || '60 сек';
+  var fmt   = grad('fmt') || '';
+  var date  = new Date().toLocaleDateString('ru-RU');
 
-  function np(){ doc.addPage(); y=16; }
-  function cy(n){ if(y+(n||18)>282) np(); }
-  function tf(st,sz){ doc.setFont('helvetica',st); doc.setFontSize(sz); }
-  function tc(r,g,b){ doc.setTextColor(r,g,b); }
-  function bx(x,yy,w,h,fr,fg,fb_,sr,sg,sb){ doc.setFillColor(fr,fg,fb_); doc.setDrawColor(sr||200,sg||198,sb||190); doc.setLineWidth(0.2); doc.roundedRect(x,yy,w,h,2,2,'FD'); }
-  function wt(txt,x,yy,mw,sz,st,cr,cg,cb){ tf(st||'normal',sz||10); tc(cr||30,cg||28,cb||20); var ls=doc.splitTextToSize(txt||'—',mw); doc.text(ls,x,yy); return ls.length*(((sz||10)*0.38)+1.4); }
-  function fld(lbl,val,accent){
-    cy(18); tf('bold',8); tc(130,128,120); doc.text(lbl.toUpperCase(),M,y); y+=5;
-    var ls=doc.splitTextToSize(val||'—',TW-8); var bh=ls.length*5.5+8; cy(bh);
-    bx(M,y,TW,bh, accent?255:248, accent?248:247, accent?224:243, 210,208,198);
-    tf('normal',10); tc(25,23,18); ls.forEach(function(l,i){ doc.text(l,M+4,y+5+i*5.5); }); y+=bh+5;
+  function esc(t){ return (t||'—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function block(label, val, type) {
+    var cls = type === 'accent' ? 'val-accent' : type === 'green' ? 'val-green' : type === 'quote' ? 'val-quote' : 'val-default';
+    return '<div class="field">'+
+      '<div class="field-label">'+label+'</div>'+
+      '<div class="field-val '+cls+'">'+esc(val)+'</div>'+
+    '</div>';
   }
-  function sh(label,ico,r,g,b){ cy(12); doc.setFillColor(r||240,g||238,b||232); doc.rect(M,y,TW,8,'F'); tf('bold',9); tc(50,48,40); doc.text(ico+'  '+label,M+3,y+5.5); y+=12; }
 
-  // Cover
-  doc.setFillColor(13,13,15); doc.rect(0,0,210,297,'F');
-  doc.setFillColor(255,77,28); doc.rect(0,0,9,297,'F');
-  tf('bold',34); tc(255,255,255); doc.text('СЦЕНАРИЙ',16,48);
-  tf('bold',34); tc(255,77,28); doc.text('РИЛСА',16,64);
-  tf('normal',12); tc(144,144,160);
-  var tl=doc.splitTextToSize(gval('topicInput')||'',TW-8); tl.forEach(function(l,i){ doc.text(l,16,84+i*7); });
-  tf('normal',8); tc(90,88,100); doc.text('Reels Script AI · '+new Date().toLocaleDateString('ru-RU'),16,284);
-  tf('bold',8); tc(255,77,28); doc.text('REELS SCRIPT AI',5,155,{angle:90});
+  function scene(val) {
+    return '<div class="field">'+
+      '<div class="field-val val-scene"><span class="scene-tag">📷 В КАДРЕ</span> '+esc(val)+'</div>'+
+    '</div>';
+  }
 
-  // Page 2
-  np();
-  tf('bold',17); tc(25,23,18); doc.text('СЦЕНАРИЙ РИЛСА',M,y); y+=6;
-  doc.setDrawColor(210,208,198); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=8;
-  tf('normal',9); tc(100,98,90);
-  doc.text('Тема: '+(gval('topicInput')||'').substr(0,80),M,y); y+=5;
-  doc.text('Формат: '+(grad('fmt')||'—')+'  ·  Длина: '+(grad('dur')||'—'),M,y); y+=9;
+  function prod(shoot, cut) {
+    if(!shoot && !cut) return '';
+    return '<div class="prod">'+
+      '<div class="prod-title">🎬 ПРОДАКШЕН</div>'+
+      (shoot ? '<div class="prod-row"><span class="prod-tag cam">📷 СЪЁМКА</span><span class="prod-text">'+esc(shoot)+'</span></div>' : '')+
+      (cut   ? '<div class="prod-row"><span class="prod-tag cut">✂️ МОНТАЖ</span><span class="prod-text">'+esc(cut)+'</span></div>' : '')+
+    '</div>';
+  }
 
-  sh('КОНФЛИКТ В ОСНОВЕ ИСТОРИИ','⚡',255,240,232);
-  fld('О ЧЁМ НА САМОМ ДЕЛЕ ЭТОТ РИЛС', s.conflict, true);
-  fld('ПОЧЕМУ ЭТО ИНТЕРЕСНО ШИРОКОЙ АУДИТОРИИ', s.wide_why, false);
+  function section(ico, title, color, content) {
+    return '<div class="section" style="border-left-color:'+color+'">'+
+      '<div class="section-head" style="background:'+color+'18">'+
+        '<span class="section-ico">'+ico+'</span>'+
+        '<span class="section-title">'+title+'</span>'+
+      '</div>'+
+      '<div class="section-body">'+content+'</div>'+
+    '</div>';
+  }
 
-  sh('ХУК — ПЕРВЫЕ 3 СЕКУНДЫ','🎣',255,252,228);
-  fld('ЧТО В КАДРЕ (ВИЗУАЛЬНЫЙ ХУК)', s.hook_visual, false);
-  fld('ПЕРВАЯ ФРАЗА / ТИТР', '"'+(s.hook_text||'—')+'"', true);
+  var pointsHTML = pts.map(function(p, i) {
+    return '<div class="point">'+
+      '<div class="point-num">'+(i+1)+'</div>'+
+      '<div class="point-body">'+
+        '<div class="point-text">'+esc(p.text)+'</div>'+
+        scene(p.scene)+
+        prod(p.shoot, p.cut)+
+      '</div>'+
+    '</div>';
+  }).join('');
 
-  sh('УСИЛЕНИЕ','🔥',255,238,225);
-  fld('ТЕКСТ', s.amp_text, false);
-  fld('КАДР / ВСТАВКА', s.amp_scene, false);
+  var ctaHTML = s.cta ? section('📣','ПРИЗЫВ К ДЕЙСТВИЮ','#4488ff',
+    '<div class="field"><div class="field-val val-quote" style="font-size:18px;font-weight:800;">'+esc(s.cta)+'</div></div>'
+  ) : '';
 
-  sh('РАСКРЫТИЕ','📖',228,238,255);
-  (s.points||[]).forEach(function(p,i){
-    cy(22); tf('bold',9); tc(30,28,20); doc.text('ПУНКТ '+(i+1),M,y); y+=5;
-    fld('ТЕКСТ', p.text, false);
-    fld('КАДР', p.scene, false);
-    y+=2;
-  });
+  var html = '<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">'+
+  '<title>Сценарий рилса — WYMOR</title>'+
+  '<style>'+
+    '@import url("https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap");'+
+    '*{margin:0;padding:0;box-sizing:border-box;}'+
+    'body{font-family:"Geologica",sans-serif;background:#fff;color:#1a1a1a;font-size:13px;line-height:1.6;}'+
 
-  sh('ВЫВОД — PAY-OFF','💡',228,248,236);
-  fld('ГЛАВНАЯ МЫСЛЬ', s.conclusion, true);
-  fld('КАДР', s.conc_scene, false);
+    /* Cover */
+    '.cover{background:#07070a;color:#fff;padding:60px 48px;min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;page-break-after:always;}'+
+    '.cover-brand{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#6060a0;font-family:"JetBrains Mono",monospace;}'+
+    '.cover-line{width:40px;height:3px;background:linear-gradient(90deg,#ff3355,#ff6535);margin:20px 0;}'+
+    '.cover-title{font-size:52px;font-weight:900;line-height:1.05;letter-spacing:-2px;}'+
+    '.cover-title span{background:linear-gradient(90deg,#ff3355,#ff6535);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}'+
+    '.cover-topic{font-size:16px;color:#b0acd0;margin-top:24px;max-width:480px;line-height:1.6;font-weight:400;}'+
+    '.cover-meta{display:flex;gap:16px;flex-wrap:wrap;}'+
+    '.cover-tag{font-size:11px;font-family:"JetBrains Mono",monospace;border:1px solid #2a2a3e;color:#6060a0;border-radius:4px;padding:4px 10px;letter-spacing:1px;}'+
+    '.cover-date{font-size:11px;color:#3a3a5a;font-family:"JetBrains Mono",monospace;}'+
 
-  if(s.cta){ sh('ПРИЗЫВ К ДЕЙСТВИЮ','📣',228,236,255); fld('ТЕКСТ', s.cta, true); }
+    /* Content */
+    '.content{padding:40px 48px;max-width:720px;margin:0 auto;}'+
+    '.section{border:1px solid #e8e8ee;border-left:4px solid #ccc;border-radius:8px;margin-bottom:20px;overflow:hidden;page-break-inside:avoid;}'+
+    '.section-head{display:flex;align-items:center;gap:12px;padding:14px 18px;}'+
+    '.section-ico{font-size:20px;width:36px;text-align:center;}'+
+    '.section-title{font-size:15px;font-weight:800;letter-spacing:-.2px;}'+
+    '.section-body{padding:16px 18px;border-top:1px solid #f0f0f4;}'+
 
-  cy(16); sh('СОВЕТЫ ПО СЪЁМКЕ','🎬',242,240,234);
-  (s.shoot||[]).forEach(function(t){
-    cy(12); var h=wt('• '+t,M+4,y+4,TW-8,9); bx(M,y,TW,h+6,248,247,243,210,208,198); y+=h+10;
-  });
+    '.field{margin-bottom:14px;}'+
+    '.field:last-child{margin-bottom:0;}'+
+    '.field-label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9090b0;margin-bottom:6px;font-family:"JetBrains Mono",monospace;}'+
+    '.field-val{font-size:13px;line-height:1.65;padding:12px 14px;border-radius:6px;}'+
+    '.val-default{background:#f8f8fc;border:1px solid #e8e8ee;}'+
+    '.val-accent{background:#fff5f0;border:1px solid #ffd0c0;font-weight:600;}'+
+    '.val-green{background:#f0fdf6;border:1px solid #b0f0d0;font-weight:700;font-size:15px;}'+
+    '.val-quote{background:#fff8e6;border:1px solid #ffe0a0;font-weight:700;font-size:16px;font-style:italic;}'+
+    '.val-scene{background:#f4f4ff;border:1px solid #d8d8f0;}'+
+    '.scene-tag{display:inline-block;background:#e0e0ff;color:#4040c0;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:3px;padding:2px 6px;margin-right:6px;font-family:"JetBrains Mono",monospace;}'+
 
-  cy(16); sh('МОНТАЖ','✂️',232,246,238);
-  (s.edit||[]).forEach(function(t){
-    cy(12); var h=wt('• '+t,M+4,y+4,TW-8,9); bx(M,y,TW,h+6,232,246,238,180,220,200); y+=h+10;
-  });
+    '.prod{margin-top:12px;padding-top:12px;border-top:1px dashed #e0e0ee;}'+
+    '.prod-title{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#a0a0c0;margin-bottom:8px;font-family:"JetBrains Mono",monospace;}'+
+    '.prod-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px;}'+
+    '.prod-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:3px;padding:2px 6px;white-space:nowrap;margin-top:2px;font-family:"JetBrains Mono",monospace;}'+
+    '.prod-tag.cam{background:#fff8d0;color:#807010;}'+
+    '.prod-tag.cut{background:#d0f8e8;color:#107040;}'+
+    '.prod-text{font-size:12px;color:#404060;line-height:1.5;}'+
 
-  // Checklist
-  np();
-  tf('bold',15); tc(25,23,18); doc.text('ЧЕКЛИСТ 10 ПРАВИЛ',M,y); y+=6;
-  doc.setDrawColor(210,208,198); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=10;
-  var rules=['Тема широкая — интересна миллионам, не только профессионалам','В основе — конфликт или противоречие, а не просто набор фактов','Хук цепляет с первых 3 секунд: необычный визуал + триггерная фраза','Строгая структура: хук → усиление → раскрытие → вывод → CTA','Только короткие предложения — ноль сложных терминов','На каждый тезис — отдельная визуальная вставка','Pay-off: зритель получает реальную ценность, а не обещание','Есть причина подписаться прямо сейчас','Контент подходит для TikTok, YouTube Shorts, ВК Клипов','Единый тон и формат на протяжении всего рилса'];
-  rules.forEach(function(r,i){
-    cy(11); bx(M,y,TW,9,248,247,243,210,208,198);
-    doc.setFillColor(232,230,224); doc.rect(M,y,7,9,'F');
-    tf('bold',9); tc(80,78,70); doc.text(''+(i+1),M+2.8,y+6.2);
-    tf('normal',9); tc(25,23,18); doc.text(r,M+10,y+6.2); y+=12;
-  });
+    '.point{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #f0f0f4;}'+
+    '.point:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}'+
+    '.point-num{width:28px;height:28px;background:linear-gradient(135deg,#ff3355,#ff6535);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;margin-top:2px;}'+
+    '.point-body{flex:1;}'+
+    '.point-text{font-size:14px;font-weight:700;margin-bottom:8px;line-height:1.4;}'+
 
-  var pn=doc.getNumberOfPages();
-  for(var i=2;i<=pn;i++){ doc.setPage(i); tf('normal',8); tc(150,148,140); doc.text('Reels Script AI · стр '+i+'/'+pn,M,290); }
+    /* Checklist page */
+    '.checklist-page{padding:40px 48px;max-width:720px;margin:0 auto;page-break-before:always;}'+
+    '.checklist-title{font-size:24px;font-weight:900;letter-spacing:-1px;margin-bottom:6px;}'+
+    '.checklist-sub{font-size:13px;color:#9090b0;margin-bottom:24px;}'+
+    '.rule{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border-radius:6px;margin-bottom:8px;background:#f8f8fc;border:1px solid #e8e8ee;}'+
+    '.rule-num{width:24px;height:24px;background:#1a1a2e;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;font-family:"JetBrains Mono",monospace;}'+
+    '.rule-text{font-size:13px;line-height:1.5;color:#2a2a3a;}'+
+    '.rule-check{width:20px;height:20px;border:2px solid #d0d0e0;border-radius:4px;flex-shrink:0;margin-top:2px;}'+
 
-  doc.save('reels-script-'+Date.now()+'.pdf');
-  toast('✓ PDF сохранён');
+    '.footer{font-size:10px;color:#c0c0d0;text-align:center;padding:20px;font-family:"JetBrains Mono",monospace;}'+
+
+    '@media print{'+
+      'body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}'+
+      '.cover{min-height:auto;padding:48px;}'+
+    '}'+
+  '</style></head><body>'+
+
+  /* COVER */
+  '<div class="cover">'+
+    '<div>'+
+      '<div class="cover-brand">WYMOR · Reels Script AI</div>'+
+      '<div class="cover-line"></div>'+
+      '<div class="cover-title">СЦЕНАРИЙ<br><span>РИЛСА</span></div>'+
+      '<div class="cover-topic">'+esc(topic)+'</div>'+
+    '</div>'+
+    '<div>'+
+      '<div class="cover-meta">'+
+        '<div class="cover-tag">'+esc(dur)+'</div>'+
+        '<div class="cover-tag">'+(s.payoff||'pay-off')+'</div>'+
+        '<div class="cover-tag">'+pts.length+' пунктов</div>'+
+      '</div>'+
+      '<div class="cover-date" style="margin-top:12px;">'+date+'</div>'+
+    '</div>'+
+  '</div>'+
+
+  /* CONTENT */
+  '<div class="content">'+
+
+  section('⚡','КОНФЛИКТ В ОСНОВЕ ИСТОРИИ','#ff3355',
+    block('О ЧЁМ НА САМОМ ДЕЛЕ ЭТОТ РИЛС', s.conflict, 'accent')+
+    block('ПОЧЕМУ ЭТО ИНТЕРЕСНО ШИРОКОЙ АУДИТОРИИ', s.wide_why, '')
+  )+
+
+  section('🎣','ХУК — ПЕРВЫЕ 3 СЕКУНДЫ','#ffd166',
+    scene(hook.visual || s.hook_visual)+
+    block('ПЕРВАЯ ФРАЗА / ТИТР', '"'+(hook.text||s.hook_text||'—')+'"', 'quote')+
+    prod(hook.shoot, hook.cut)
+  )+
+
+  section('🔥','УСИЛЕНИЕ — НАГНЕТАЕМ ИНТЕРЕС','#ff6535',
+    block('ТЕКСТ', amp.text||s.amp_text, '')+
+    scene(amp.scene||s.amp_scene)+
+    prod(amp.shoot, amp.cut)
+  )+
+
+  section('📖','РАСКРЫТИЕ — ОСНОВНОЙ КОНТЕНТ','#4488ff', pointsHTML)+
+
+  section('💡','ВЫВОД — PAY-OFF','#00e5a0',
+    block('ГЛАВНАЯ МЫСЛЬ (то, что захотят репостить)', conc.text||(typeof s.conclusion==='string'?s.conclusion:''), 'green')+
+    scene(conc.scene||s.conc_scene)+
+    prod(conc.shoot, conc.cut)
+  )+
+
+  ctaHTML+
+
+  '</div>'+
+
+  /* CHECKLIST */
+  '<div class="checklist-page">'+
+    '<div class="checklist-title">Чеклист 10 правил</div>'+
+    '<div class="checklist-sub">Проверь сценарий перед съёмкой</div>'+
+    ['Тема широкая — интересна миллионам, не только профессионалам',
+     'В основе — конфликт или противоречие, а не набор фактов',
+     'Хук цепляет с первых 3 секунд: необычный визуал + триггерная фраза',
+     'Строгая структура: хук → усиление → раскрытие → вывод → CTA',
+     'Только короткие предложения — ноль сложных терминов',
+     'На каждый тезис — отдельная визуальная вставка',
+     'Pay-off: зритель получает реальную ценность, а не обещание',
+     'Есть причина подписаться прямо сейчас',
+     'Контент подходит для TikTok, YouTube Shorts, ВК Клипов',
+     'Единый тон и формат на протяжении всего рилса'
+    ].map(function(r,i){
+      return '<div class="rule">'+
+        '<div class="rule-num">'+(i+1)+'</div>'+
+        '<div class="rule-text">'+r+'</div>'+
+        '<div class="rule-check"></div>'+
+      '</div>';
+    }).join('')+
+  '</div>'+
+
+  '<div class="footer">WYMOR · Reels Script AI · '+date+'</div>'+
+
+  '<script>window.onload=function(){window.print();}<\/script>'+
+  '</body></html>';
+
+  var w = window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  toast('✓ Открываю PDF для печати');
 }
 </script>
 </body>
