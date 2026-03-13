@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WYMOR · Reels Продюсер</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geologica:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:        #07070a;
+  --s1:        #0e0e14;
+  --s2:        #141420;
+  --s3:        #1c1c2c;
+  --border:    #1e1e2e;
+  --border2:   #2a2a3e;
+  --text:      #eeeaf8;
+  --text2:     #b0acd0;
+  --text3:     #6060a0;
+  --accent:    #ff3355;
+  --acc2:      rgba(255,51,85,0.15);
+  --acc3:      rgba(255,51,85,0.08);
+  --accent2:   #ff6535;
+  --green:     #00e5a0;
+  --grn2:      rgba(0,229,160,0.12);
+  --blue:      #4488ff;
+  --blu2:      rgba(68,136,255,0.12);
+  --yellow:    #ffd166;
+  --yel2:      rgba(255,209,102,0.12);
+  --r:         12px;
+  --r2:        9px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body{
+  font-family:'Geologica',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  font-size:16px;
+  line-height:1.55;
+}
+
+/* ─── HEADER ─── */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(13,13,15,0.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+}
+.logo{
+  font-size:19px;font-weight:900;letter-spacing:-0.5px;
+  display:flex;align-items:center;gap:9px;
+}
+.logo-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 10px var(--accent);
+}
+.hdr-pill{
+  font-size:12px;font-weight:600;
+  padding:5px 12px;border-radius:20px;
+  background:var(--s2);border:1px solid var(--border2);
+  color:var(--text2);letter-spacing:0.03em;
+}
+
+/* ─── STEP BAR ─── */
+.stepbar{
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 28px;gap:0;
+  overflow-x:auto;
+}
+.step{
+  display:flex;align-items:center;gap:9px;
+  padding:14px 24px 14px 0;
+  font-size:14px;font-weight:600;color:var(--text3);
+  white-space:nowrap;flex-shrink:0;
+  transition:color .2s;
+}
+.step.active{color:var(--text);}
+.step.done{color:var(--green);}
+.step-n{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;
+  background:var(--s3);border:1.5px solid var(--border2);color:var(--text3);
+  transition:all .2s;flex-shrink:0;
+}
+.step.active .step-n{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 12px rgba(255,77,28,.4);}
+.step.done  .step-n{background:var(--grn2);border-color:var(--green);color:var(--green);}
+.step-sep{color:var(--text3);font-size:16px;margin-right:24px;flex-shrink:0;}
+
+/* ─── PAGES ─── */
+.page{display:none;}
+.page.active{display:block;animation:up .28s ease;}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.wrap{max-width:760px;margin:0 auto;padding:36px 20px 100px;}
+
+/* ─── PAGE HEADING ─── */
+.ph{margin-bottom:28px;}
+.ph h2{font-size:30px;font-weight:900;letter-spacing:-1px;margin-bottom:6px;}
+.ph p{font-size:16px;color:var(--text2);}
+
+/* ─── CARD ─── */
+.card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  margin-bottom:16px;
+  overflow:hidden;
+}
+.card-top{
+  padding:20px 22px 0;
+  display:flex;align-items:flex-start;gap:14px;
+}
+.card-ico{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.card-sup{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+.card-h{font-size:20px;font-weight:800;letter-spacing:-.3px;}
+.card-body{padding:18px 22px 22px;}
+
+/* ─── FORM ─── */
+.fg{margin-bottom:20px;}
+.fg:last-child{margin-bottom:0;}
+.lbl{display:block;font-size:14px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:.02em;}
+.hint{font-size:13px;color:var(--text3);margin-top:5px;line-height:1.5;}
+.hint a{color:var(--blue);text-decoration:none;}
+
+input[type=text],input[type=password],textarea{
+  width:100%;padding:13px 15px;
+  font-family:'Geologica',sans-serif;font-size:16px;color:var(--text);
+  background:var(--s2);border:1.5px solid var(--border2);border-radius:var(--r2);
+  transition:border-color .15s,box-shadow .15s;
+}
+input[type=text]:focus,input[type=password]:focus,textarea:focus{
+  outline:none;border-color:rgba(255,77,28,.6);
+  box-shadow:0 0 0 3px rgba(255,77,28,.1);
+  background:var(--s3);
+}
+textarea{resize:vertical;min-height:96px;line-height:1.6;}
+
+.inp-wrap{position:relative;}
+.inp-wrap input{padding-right:46px;}
+.eye-btn{
+  position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:17px;color:var(--text3);
+  padding:4px;
+}
+
+/* ─── FORMAT CARDS ─── */
+.fmt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:540px){.fmt-grid{grid-template-columns:1fr;}}
+.fmt-inp{display:none;}
+.fmt-lbl{
+  display:block;cursor:pointer;
+  border:1.5px solid var(--border2);border-radius:var(--r2);
+  padding:16px;background:var(--s2);
+  transition:all .15s;position:relative;
+}
+.fmt-lbl:hover{border-color:rgba(255,255,255,.22);background:var(--s3);}
+.fmt-inp:checked+.fmt-lbl{
+  border-color:var(--accent);background:rgba(255,77,28,.07);
+  box-shadow:0 0 0 1px rgba(255,77,28,.2);
+}
+.fmt-emo{font-size:26px;margin-bottom:9px;}
+.fmt-name{font-size:17px;font-weight:800;margin-bottom:5px;}
+.fmt-desc{font-size:13px;color:var(--text2);line-height:1.55;}
+.fmt-chk{
+  position:absolute;top:13px;right:13px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--s3);border:1.5px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.fmt-inp:checked+.fmt-lbl .fmt-chk{background:var(--accent);border-color:var(--accent);}
+.fmt-inp:checked+.fmt-lbl .fmt-chk::after{content:'✓';color:#fff;font-size:11px;font-weight:800;}
+
+/* ─── PILL TOGGLE (multi) ─── */
+.pills{display:flex;flex-wrap:wrap;gap:8px;}
+.pi{display:none;}
+.pl{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:10px 16px;
+  font-size:15px;font-weight:600;color:var(--text2);
+  background:var(--s2);border:1.5px solid var(--border2);
+  border-radius:30px;cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.pl:hover{border-color:rgba(255,255,255,.22);color:var(--text);}
+.pi:checked+.pl{background:rgba(255,77,28,.12);border-color:rgba(255,77,28,.5);color:var(--accent);}
+
+/* ─── LEAD OPTIONS ─── */
+.lead-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+@media(max-width:480px){.lead-grid{grid-template-columns:1fr;}}
+.li-inp{display:none;}
+.li-lbl{
+  display:block;cursor:pointer;
+  padding:13px 15px;border:1.5px solid var(--border2);
+  border-radius:var(--r2);background:var(--s2);
+  font-size:14px;font-weight:600;color:var(--text2);
+  transition:all .15s;
+}
+.li-lbl:hover{border-color:rgba(255,255,255,.22);}
+.li-inp:checked+.li-lbl{background:var(--blu2);border-color:rgba(77,142,255,.5);color:var(--blue);}
+.li-emo{font-size:18px;margin-bottom:5px;display:block;}
+
+/* ─── DURATION ─── */
+.dur-row{display:flex;gap:8px;}
+.di{display:none;}
+.dl{
+  flex:1;display:block;cursor:pointer;text-align:center;
+  padding:14px 10px;
+  font-size:22px;font-weight:900;color:var(--text2);
+  background:var(--s2);border:1.5px solid var(--border2);
+  border-radius:var(--r2);transition:all .15s;
+}
+.dl small{display:block;font-size:12px;font-weight:500;color:inherit;opacity:.65;}
+.dl:hover{border-color:rgba(255,255,255,.22);}
+.di:checked+.dl{background:var(--acc2);border-color:rgba(255,77,28,.5);color:var(--accent);}
+
+/* ─── BUTTONS ─── */
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:14px 24px;
+  font-family:'Geologica',sans-serif;font-size:16px;font-weight:700;
+  border-radius:var(--r2);border:none;cursor:pointer;
+  transition:all .15s;letter-spacing:-.1px;
+}
+.btn svg{width:17px;height:17px;flex-shrink:0;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#ff5e31;transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,77,28,.35);}
+.btn-primary:active{transform:translateY(0);}
+.btn-ghost{background:var(--s2);color:var(--text2);border:1.5px solid var(--border2);}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--s3);}
+.btn-green{background:rgba(45,216,130,.15);color:var(--green);border:1.5px solid rgba(45,216,130,.3);}
+.btn-green:hover{background:rgba(45,216,130,.22);}
+.btn-blue{background:rgba(77,142,255,.15);color:var(--blue);border:1.5px solid rgba(77,142,255,.3);}
+.btn-blue:hover{background:rgba(77,142,255,.22);}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+.btn-row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px;}
+.btn-wide{width:100%;justify-content:center;padding:16px;}
+
+/* ─── ANALYZE / LOADING ─── */
+.analyze-box{
+  display:none;background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);padding:36px;text-align:center;margin-bottom:16px;
+}
+.analyze-box.on{display:block;animation:up .25s ease;}
+.spin{
+  width:46px;height:46px;border-radius:50%;
+  border:3px solid var(--s3);border-top-color:var(--accent);
+  animation:rot .75s linear infinite;margin:0 auto 16px;
+}
+@keyframes rot{to{transform:rotate(360deg)}}
+.spin-title{font-size:19px;font-weight:800;margin-bottom:5px;}
+.spin-sub{font-size:13px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+
+/* ─── AI CHOICES ─── */
+.ai-choices{display:none;}
+.ai-choices.on{display:block;animation:up .3s ease;}
+.ai-label{
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.ai-badge{
+  background:var(--accent);color:#fff;
+  font-size:9px;font-weight:700;letter-spacing:.08em;
+  padding:2px 6px;border-radius:4px;text-transform:uppercase;
+}
+
+/* audience */
+.aud-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.aui{display:none;}
+.aul{
+  display:block;cursor:pointer;
+  padding:10px 16px;font-size:14px;font-weight:600;color:var(--text2);
+  background:var(--s2);border:1.5px solid var(--border2);border-radius:30px;
+  transition:all .15s;
+}
+.aui:checked+.aul{background:var(--blu2);border-color:rgba(77,142,255,.5);color:var(--blue);}
+
+/* pains */
+.pain-wrap{display:flex;flex-wrap:wrap;gap:7px;}
+.pain-chip{
+  padding:7px 13px;font-size:13px;font-weight:600;
+  background:var(--acc3);border:1px solid rgba(255,77,28,.2);
+  color:var(--text2);border-radius:20px;
+}
+
+/* goals */
+.goal-list{display:flex;flex-direction:column;gap:8px;}
+.gi{display:none;}
+.gl{
+  display:block;cursor:pointer;
+  padding:16px 18px;
+  font-size:16px;font-weight:700;color:var(--text);
+  background:var(--s2);border:1.5px solid var(--border2);border-radius:var(--r2);
+  transition:all .15s;line-height:1.4;
+}
+.gl:hover{border-color:rgba(255,255,255,.22);}
+.gl small{display:block;font-size:13px;font-weight:400;color:var(--text3);margin-top:4px;}
+.gi:checked+.gl{background:var(--yel2);border-color:rgba(255,216,77,.45);color:var(--text);}
+.gi:checked+.gl small{color:var(--text2);}
+.own-row{display:flex;gap:8px;margin-top:8px;}
+.own-row input{flex:1;}
+.add-btn{
+  padding:13px 18px;font-size:15px;font-weight:700;
+  background:var(--s2);color:var(--text2);
+  border:1.5px solid var(--border2);border-radius:var(--r2);
+  cursor:pointer;transition:all .15s;font-family:'Geologica',sans-serif;white-space:nowrap;
+}
+.add-btn:hover{border-color:rgba(255,255,255,.22);color:var(--text);}
+
+/* ─── ERROR ─── */
+.err{
+  display:none;background:rgba(255,77,28,.08);
+  border:1.5px solid rgba(255,77,28,.3);border-radius:var(--r2);
+  padding:14px 16px;font-size:15px;font-weight:600;color:var(--accent);
+  margin-bottom:14px;
+}
+.err.on{display:block;}
+
+/* ─── GEN OVERLAY ─── */
+.gen-ov{
+  display:none;position:fixed;inset:0;
+  background:rgba(13,13,15,.93);backdrop-filter:blur(10px);
+  z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+}
+.gen-ov.on{display:flex;}
+.big-spin{
+  width:68px;height:68px;border-radius:50%;
+  border:4px solid var(--s3);border-top-color:var(--accent);
+  animation:rot .8s linear infinite;
+}
+.gen-title{font-size:26px;font-weight:900;letter-spacing:-1px;}
+.gen-sub{font-size:14px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
+
+/* ─── RESULT ─── */
+.res-header{
+  background:linear-gradient(135deg,#1a0d08 0%,#180d1a 100%);
+  border:1px solid rgba(255,77,28,.2);
+  border-radius:var(--r);padding:26px;margin-bottom:16px;
+}
+.res-h{font-size:26px;font-weight:900;letter-spacing:-.8px;margin-bottom:5px;}
+.res-sub{font-size:14px;color:var(--text2);}
+.res-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;}
+.res-tag{
+  padding:5px 12px;border-radius:16px;
+  font-size:13px;font-weight:600;
+  background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);
+}
+
+.ss{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r);margin-bottom:12px;overflow:hidden;
+}
+.ss-head{
+  padding:18px 20px;display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:background .12s;
+  border-bottom:1px solid var(--border);
+}
+.ss-head:hover{background:var(--s2);}
+.ss-ico{
+  width:40px;height:40px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.ss-title{font-size:18px;font-weight:800;flex:1;letter-spacing:-.2px;}
+.ss-arr{font-size:18px;color:var(--text3);}
+.ss-body{padding:20px 22px;}
+.ss-body.closed{display:none;}
+
+.fb{margin-bottom:16px;}
+.fb:last-child{margin-bottom:0;}
+.fb-lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.fb-val{
+  font-size:16px;line-height:1.65;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r2);padding:14px 16px;
+}
+.fb-val.big{font-size:20px;font-weight:800;letter-spacing:-.3px;}
+.fb-val.accent{background:rgba(255,77,28,.08);border-color:rgba(255,77,28,.2);}
+.fb-val.green{background:rgba(45,216,130,.07);border-color:rgba(45,216,130,.2);}
+
+.scene-lbl{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:700;color:var(--accent);
+  background:var(--acc3);border:1px solid rgba(255,77,28,.2);
+  padding:3px 9px;border-radius:5px;margin-bottom:7px;letter-spacing:.03em;
+}
+
+.pt-block{
+  padding:16px;border-radius:var(--r2);
+  border:1px solid var(--border);background:var(--s2);
+  margin-bottom:10px;
+}
+.pt-block:last-child{margin-bottom:0;}
+.pt-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  font-size:13px;font-weight:800;margin-bottom:10px;
+}
+.pt-text{font-size:17px;font-weight:700;line-height:1.5;margin-bottom:10px;}
+.pt-scene{font-size:14px;color:var(--text2);line-height:1.55;}
+
+.tip-row{
+  display:flex;gap:11px;align-items:flex-start;
+  padding:12px 0;border-bottom:1px solid var(--border);
+  font-size:15px;line-height:1.55;
+}
+.tip-row:last-child{border-bottom:none;padding-bottom:0;}
+.tip-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:7px;flex-shrink:0;}
+
+/* ─── TOAST ─── */
+.toast{
+  display:none;position:fixed;bottom:24px;right:24px;z-index:300;
+  background:var(--s3);border:1px solid var(--border2);
+  border-radius:var(--r2);padding:13px 20px;
+  font-size:15px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.toast.on{display:block;animation:up .2s ease;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--s1);}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,#ff3355,#ff6535);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">WYMOR</span>
+    <span style="font-size:11px;font-weight:500;letter-spacing:2px;color:var(--text3);text-transform:uppercase;border:1px solid var(--border2);border-radius:4px;padding:2px 8px;font-family:'JetBrains Mono',monospace;">Reels</span>
+  </div>
+  <div class="hdr-pill" id="hdrPill">Шаг 1 из 3</div>
+</header>
+
+<!-- STEP BAR -->
+<div class="stepbar">
+  <div class="step active" id="st0"><span class="step-n">1</span>Настройки</div>
+  <span class="step-sep">›</span>
+  <div class="step" id="st1"><span class="step-n">2</span>Тема</div>
+  <span class="step-sep">›</span>
+  <div class="step" id="st2"><span class="step-n">3</span>Сценарий</div>
+</div>
+
+<!-- ═══ PAGE 0: SETTINGS ═══ -->
+<div class="page" id="pg0">
+<div class="wrap">
+  <div class="ph"><h2>Настройки</h2><p>Выбери один раз — сохранится для всех рилсов</p></div>
+
+  <div class="card">
+    <div class="card-top">
+      <div class="card-ico" style="background:rgba(77,142,255,.12)">🎬</div>
+      <div><div class="card-sup">Обязательно</div><div class="card-h">Формат съёмки</div></div>
+    </div>
+    <div class="card-body">
+      <div class="fmt-grid">
+        <div>
+          <input type="radio" name="fmt" id="f1" class="fmt-inp" value="dynamic" checked>
+          <label class="fmt-lbl" for="f1">
+            <div class="fmt-chk"></div>
+            <div class="fmt-emo">⚡</div>
+            <div class="fmt-name">Динамичный</div>
+            <div class="fmt-desc">Голос за кадром + быстрая смена картинок каждые 2–3 секунды. Самый популярный формат — легко держит внимание.</div>
+          </label>
+        </div>
+        <div>
+          <input type="radio" name="fmt" id="f2" class="fmt-inp" value="talking">
+          <label class="fmt-lbl" for="f2">
+            <div class="fmt-chk"></div>
+            <div class="fmt-emo">🗣️</div>
+            <div class="fmt-name">Говорящая голова</div>
+            <div class="fmt-desc">Ты в кадре говоришь напрямую с камерой. Работает, когда история сильнее любого видеоряда — плюс вставки между репликами.</div>
+          </label>
+        </div>
+        <div>
+          <input type="radio" name="fmt" id="f3" class="fmt-inp" value="scene">
+          <label class="fmt-lbl" for="f3">
+            <div class="fmt-chk"></div>
+            <div class="fmt-emo">🎭</div>
+            <div class="fmt-name">Сценка / скетч</div>
+            <div class="fmt-desc">Разыгрывается ситуация с людьми. Идеально, когда в основе — конфликт, ирония или узнаваемое поведение.</div>
+          </label>
+        </div>
+        <div>
+          <input type="radio" name="fmt" id="f4" class="fmt-inp" value="review">
+          <label class="fmt-lbl" for="f4">
+            <div class="fmt-chk"></div>
+            <div class="fmt-emo">🔍</div>
+            <div class="fmt-name">Обзор / демонстрация</div>
+            <div class="fmt-desc">Показываешь объект, место, продукт или процесс крупным планом. Подходит для недвижимости, еды, товаров, интерьеров.</div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-top">
+      <div class="card-ico" style="background:rgba(45,216,130,.12)">📣</div>
+      <div><div class="card-sup">Можно выбрать несколько</div><div class="card-h">Призыв к действию</div></div>
+    </div>
+    <div class="card-body">
+      <div class="pills">
+        <input type="checkbox" id="xcta1" class="pi" value="keyword"><label class="pl" for="xcta1">🔑 Кодовое слово</label>
+        <input type="checkbox" id="xcta2" class="pi" value="subscribe"><label class="pl" for="xcta2">👥 Подписка</label>
+        <input type="checkbox" id="xcta3" class="pi" value="link"><label class="pl" for="xcta3">🔗 Ссылка в шапке</label>
+        <input type="checkbox" id="xcta4" class="pi" value="comment"><label class="pl" for="xcta4">💬 Комментарий</label>
+        <input type="checkbox" id="xcta5" class="pi" value="save"><label class="pl" for="xcta5">🔖 Сохранить</label>
+        <input type="checkbox" id="xcta0" class="pi" value="none"><label class="pl" for="xcta0">— Без CTA</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-top">
+      <div class="card-ico" style="background:rgba(255,216,77,.12)">🎁</div>
+      <div><div class="card-sup">Необязательно</div><div class="card-h">Лидмагнит</div></div>
+    </div>
+    <div class="card-body">
+      <p style="font-size:15px;color:var(--text2);margin-bottom:14px">Что даёшь бесплатно тем, кто подпишется? Должно быть ценным — как платный продукт</p>
+      <div class="lead-grid">
+        <input type="radio" name="lead" id="xl1" class="li-inp" value="Чек-лист"><label class="li-lbl" for="xl1"><span class="li-emo">✅</span>Чек-лист</label>
+        <input type="radio" name="lead" id="xl2" class="li-inp" value="Гайд и инструкция"><label class="li-lbl" for="xl2"><span class="li-emo">📖</span>Гайд / инструкция</label>
+        <input type="radio" name="lead" id="xl3" class="li-inp" value="Шаблон"><label class="li-lbl" for="xl3"><span class="li-emo">📋</span>Шаблон</label>
+        <input type="radio" name="lead" id="xl4" class="li-inp" value="Видео-разбор"><label class="li-lbl" for="xl4"><span class="li-emo">🎥</span>Видео-разбор</label>
+        <input type="radio" name="lead" id="xl5" class="li-inp" value="Подборка материалов"><label class="li-lbl" for="xl5"><span class="li-emo">🗂️</span>Подборка</label>
+        <input type="radio" name="lead" id="xl6" class="li-inp" value="Бесплатная консультация"><label class="li-lbl" for="xl6"><span class="li-emo">💬</span>Консультация</label>
+      </div>
+      <input type="text" id="leadOwn" placeholder="Или напиши свой вариант..."/>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="goStep(1)">
+      Продолжить
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ PAGE 2: TOPIC ═══ -->
+<div class="page" id="pg1">
+<div class="wrap">
+  <div class="ph"><h2>Тема и цель</h2><p>Опиши идею — ИИ сам разберёт аудиторию и предложит цели</p></div>
+
+  <div class="card">
+    <div class="card-top">
+      <div class="card-ico" style="background:rgba(255,77,28,.12)">💡</div>
+      <div><div class="card-sup">Шаг 1</div><div class="card-h">О чём рилс?</div></div>
+    </div>
+    <div class="card-body">
+      <div class="fg">
+        <label class="lbl">Опиши идею своими словами</label>
+        <textarea id="topicInput" placeholder="Например: мы с женой решили переехать, и я предложил ей самой выбрать дом. Она выбрала — и это оказалось неожиданно..."></textarea>
+        <div class="hint">Пиши как угодно. Чем конкретнее история — тем сильнее сценарий.</div>
+      </div>
+      <div class="fg">
+        <label class="lbl">Длина рилса</label>
+        <div class="dur-row">
+          <input type="radio" name="dur" id="xd30" class="di" value="30 секунд"><label class="dl" for="xd30">30<small>сек</small></label>
+          <input type="radio" name="dur" id="xd60" class="di" value="60 секунд" checked><label class="dl" for="xd60">60<small>сек</small></label>
+          <input type="radio" name="dur" id="xd90" class="di" value="90 секунд"><label class="dl" for="xd90">90<small>сек</small></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="err" id="err2"></div>
+
+  <div id="analyzeBtn">
+    <button class="btn btn-primary btn-wide" onclick="analyzeTopic()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Анализировать тему
+    </button>
+  </div>
+
+  <div class="analyze-box" id="analyzeBox">
+    <div class="spin"></div>
+    <div class="spin-title">Анализирую тему...</div>
+    <div class="spin-sub" id="analyzeMsg">Определяю продукт и нишу</div>
+  </div>
+
+  <div class="ai-choices" id="aiChoices">
+    <div class="card">
+      <div class="card-top">
+        <div class="card-ico" style="background:var(--blu2)">👥</div>
+        <div><div class="card-sup">ИИ определил <span class="ai-badge">AI</span></div><div class="card-h">Кто твоя аудитория?</div></div>
+      </div>
+      <div class="card-body">
+        <div class="ai-label">Выбери одну или несколько групп</div>
+        <div class="aud-grid" id="audGrid"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="card-ico" style="background:var(--acc2)">😟</div>
+        <div><div class="card-sup">ИИ нашёл <span class="ai-badge">AI</span></div><div class="card-h">Боли этой аудитории</div></div>
+      </div>
+      <div class="card-body">
+        <div class="ai-label">Учтёт при создании сценария</div>
+        <div class="pain-wrap" id="painWrap"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="card-ico" style="background:var(--yel2)">🎯</div>
+        <div><div class="card-sup">Выбери или напиши своё <span class="ai-badge">AI</span></div><div class="card-h">Цель этого рилса</div></div>
+      </div>
+      <div class="card-body">
+        <div class="goal-list" id="goalList"></div>
+        <div class="own-row">
+          <input type="text" id="ownGoal" placeholder="Напиши свою цель..."/>
+          <button class="add-btn" onclick="addGoal()">+ Добавить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="resetAnalyze()">↺ Изменить тему</button>
+      <button class="btn btn-primary" onclick="generate()">
+        Создать сценарий
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══ PAGE 3: RESULT ═══ -->
+<div class="page" id="pg2">
+<div class="wrap">
+  <div class="res-header">
+    <div class="res-h">Сценарий готов ✦</div>
+    <div class="res-sub" id="resSub"></div>
+    <div class="res-tags" id="resTags"></div>
+  </div>
+
+  <div id="scriptOut"></div>
+
+  <div style="height:1px;background:var(--border);margin:24px 0;"></div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="goStep(1)">← Изменить</button>
+    <button class="btn btn-green" onclick="regen()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      Другой вариант
+    </button>
+    <button class="btn btn-primary" onclick="makePDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Скачать PDF
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- GEN OVERLAY -->
+<div class="gen-ov" id="genOv">
+  <div class="big-spin"></div>
+  <div class="gen-title">Создаю сценарий</div>
+  <div class="gen-sub" id="genMsg">Выстраиваю историю...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ────────────────────────────────────────
+var currentScript = null;
+var goalCounter = 0;
+
+// ─── HELPERS (declared first, no let/const issues) ────
+function gid(id){ return document.getElementById(id); }
+function gval(id){ var e=gid(id); return e ? e.value.trim() : ''; }
+function grad(name){ var e=document.querySelector('input[name="'+name+'"]:checked'); return e ? e.value : ''; }
+function toast(msg){ var t=gid('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(function(){t.classList.remove('on');},3000); }
+function err(id,msg){ var e=gid(id); if(!e)return; e.textContent=msg; e.classList.add('on'); setTimeout(function(){e.classList.remove('on');},5000); }
+function toggleEye(id,btn){ var e=gid(id); if(e.type==='password'){e.type='text';btn.textContent='🙈';}else{e.type='password';btn.textContent='👁';} }
+
+// ─── NAVIGATION ───────────────────────────────────
+function goStep(n) {
+  var pages = ['pg0','pg1','pg2'];
+  pages.forEach(function(pid, i){ gid(pid).classList.toggle('active', i===n); });
+  var steps = ['st0','st1','st2'];
+  steps.forEach(function(sid, i){
+    gid(sid).classList.toggle('active', i===n);
+    gid(sid).classList.toggle('done', i<n);
+  });
+  gid('hdrPill').textContent = 'Шаг '+(n+1)+' из 3';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ─── API CALL через Deno прокси ───────────────────
+var DENO_URL = 'https://fast-ant-34.skudatin-lang.dev.deno.co';
+
+function callGPT(prompt, systemMsg, temp, callback) {
+  fetch(DENO_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      modelUri: 'gpt://placeholder/yandexgpt/latest',
+      completionOptions: {
+        stream: false,
+        temperature: (temp || 0.85) + Math.random()*0.07,
+        maxTokens: 3000
+      },
+      messages: [
+        { role: 'system', text: systemMsg || 'Отвечай только JSON без markdown.' },
+        { role: 'user',   text: prompt }
+      ]
+    })
+  })
+  .then(function(r){
+    if(!r.ok) return r.json().then(function(e){ throw new Error(e.error && e.error.message || 'Ошибка '+r.status); });
+    return r.json();
+  })
+  .then(function(data){
+    var text = data.result && data.result.alternatives && data.result.alternatives[0] && data.result.alternatives[0].message && data.result.alternatives[0].message.text || '';
+    var clean = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    callback(null, JSON.parse(clean));
+  })
+  .catch(function(e){ callback(e, null); });
+}
+
+// ─── ANALYZE TOPIC ────────────────────────────────
+var analyzeTimer = null;
+var analyzeMsgs = ['Определяю продукт и нишу...','Анализирую аудиторию...','Нахожу боли и страхи...','Формулирую цели рилса...','Почти готово...'];
+
+function analyzeTopic() {
+  var topic = gval('topicInput');
+  if(!topic){ err('err2','Сначала опиши тему рилса'); return; }
+
+  gid('analyzeBtn').style.display = 'none';
+  gid('analyzeBox').classList.add('on');
+  gid('aiChoices').classList.remove('on');
+
+  var ai = 0;
+  analyzeTimer = setInterval(function(){ gid('analyzeMsg').textContent = analyzeMsgs[ai++%analyzeMsgs.length]; }, 1200);
+
+  var prompt = 'Проанализируй тему рилса и верни JSON.\n\nТЕМА: "'+topic+'"\n\nВерни строго JSON:\n{\n  "product": "что продвигается или о чём идёт речь (одно предложение)",\n  "audience": ["сегмент ЦА 1 (3-5 слов)", "сегмент 2", "сегмент 3", "сегмент 4"],\n  "pains": ["боль/страх аудитории 1", "боль 2", "боль 3", "боль 4", "боль 5"],\n  "goals": [\n    {"text": "Цель рилса 1 — короткая формулировка", "sub": "Что это даст зрителю"},\n    {"text": "Цель 2", "sub": "Пояснение"},\n    {"text": "Цель 3", "sub": "Пояснение"}\n  ]\n}';
+
+  callGPT(prompt, 'Ты аналитик целевой аудитории. Отвечай только JSON без markdown и пояснений.', 0.7, function(e, data){
+    clearInterval(analyzeTimer);
+    gid('analyzeBox').classList.remove('on');
+    if(e){ err('err2','Ошибка: '+e.message); gid('analyzeBtn').style.display=''; return; }
+    renderAI(data);
+    gid('aiChoices').classList.add('on');
+  });
+}
+
+function renderAI(a) {
+  // Audience
+  var ag = gid('audGrid');
+  ag.innerHTML = '';
+  (a.audience||[]).forEach(function(aud, i){
+    ag.innerHTML += '<div><input type="checkbox" name="aud" id="au'+i+'" class="aui" value="'+aud+'"'+(i===0?' checked':'')+'>'+
+      '<label class="aul" for="au'+i+'">'+aud+'</label></div>';
+  });
+
+  // Pains
+  var pw = gid('painWrap');
+  pw.innerHTML = '';
+  (a.pains||[]).forEach(function(p){ pw.innerHTML += '<div class="pain-chip">'+p+'</div>'; });
+
+  // Goals
+  var gl = gid('goalList');
+  gl.innerHTML = '';
+  (a.goals||[]).forEach(function(g, i){
+    gl.innerHTML += '<div><input type="radio" name="goal" id="g'+i+'" class="gi" value="'+escHtml(g.text)+'"'+(i===0?' checked':'')+'>'+
+      '<label class="gl" for="g'+i+'">'+escHtml(g.text)+'<small>'+escHtml(g.sub||'')+'</small></label></div>';
+  });
+  goalCounter = (a.goals||[]).length;
+}
+
+function escHtml(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function addGoal() {
+  var v = gval('ownGoal');
+  if(!v) return;
+  var i = 'own'+goalCounter++;
+  var div = document.createElement('div');
+  div.innerHTML = '<input type="radio" name="goal" id="'+i+'" class="gi" value="'+escHtml(v)+'" checked>'+
+    '<label class="gl" for="'+i+'">'+escHtml(v)+'<small>Твоя цель</small></label>';
+  gid('goalList').appendChild(div);
+  gid('ownGoal').value = '';
+  toast('Цель добавлена');
+}
+
+function resetAnalyze() {
+  gid('aiChoices').classList.remove('on');
+  gid('analyzeBtn').style.display = '';
+  gid('topicInput').focus();
+}
+
+// ─── GENERATE ─────────────────────────────────────
+var genMsgs = ['Нахожу конфликт и историю...','Придумываю хук первых 3 секунд...','Выстраиваю структуру...','Прописываю раскадровку...','Добавляю советы по съёмке...','Проверяю по 10 правилам...'];
+var genTimer = null;
+
+function buildPrompt(seed) {
+  var topic = gval('topicInput');
+  var goal  = grad('goal') || gval('ownGoal') || 'не указана';
+  var fmt   = grad('fmt') || 'dynamic';
+  var dur   = grad('dur') || '60 секунд';
+  var lead  = gval('leadOwn') || grad('lead') || 'нет';
+
+  var selAud = [];
+  document.querySelectorAll('input[name="aud"]:checked').forEach(function(e){ selAud.push(e.value); });
+  var pains = [];
+  document.querySelectorAll('.pain-chip').forEach(function(e){ pains.push(e.textContent); });
+
+  var ctaList = [];
+  ['xcta1','xcta2','xcta3','xcta4','xcta5','xcta0'].forEach(function(id){
+    var el = gid(id); if(el && el.checked) ctaList.push(el.value);
+  });
+
+  var fmtMap = {dynamic:'динамичный с закадровым голосом — смена кадров каждые 2-3 секунды',talking:'говорящая голова — автор говорит в камеру, вставки между репликами',scene:'постановочная сценка с участием людей',review:'обзор/демонстрация объекта или места'};
+  var fmtStr = fmtMap[fmt] || fmt;
+
+  return 'Ты профессиональный сценарист вирусных рилсов. Создай УНИКАЛЬНЫЙ сценарий.\n\n'+
+    'ВХОДНЫЕ ДАННЫЕ:\n'+
+    '- Тема: "'+topic+'"\n'+
+    '- Цель рилса: "'+goal+'"\n'+
+    '- Аудитория: '+(selAud.join(', ')||'широкая')+'\n'+
+    '- Боли аудитории: '+(pains.slice(0,3).join('; ')||'не определены')+'\n'+
+    '- Формат: '+fmtStr+'\n'+
+    '- Длина: '+dur+'\n'+
+    '- CTA: '+(ctaList.join(', ')||'без призыва')+'\n'+
+    '- Лидмагнит: '+lead+'\n'+
+    '- Seed уникальности: '+seed+'\n\n'+
+    'ГЛАВНОЕ ПРАВИЛО: Рилс — это мини-история с КОНФЛИКТОМ. Не набор фактов.\n'+
+    'В основе всегда лежит противоречие или неожиданная деталь которая создаёт интригу.\n'+
+    'Хук = незакрытая петля. Зритель физически не может остановиться.\n'+
+    'Pay-off = ценность которую хочется репостить.\n\n'+
+    '10 ПРАВИЛ: 1.Тема широкая — понятна миллионам. 2.Хук 3 сек (визуал+текст). 3.Структура: хук→усиление→раскрытие→вывод→CTA. 4.Простые слова. 5.Каждый тезис — отдельный кадр. 6.Pay-off. 7.Причина подписаться. 8.Каждая фраза работает. 9.Подходит для TikTok/Shorts/ВК. 10.Единый тон.\n\n'+
+    'Верни ТОЛЬКО JSON (без markdown, без пояснений):\n'+
+    '{\n'+
+    '  "conflict": "Конфликт/противоречие в основе — одно предложение",\n'+
+    '  "hook_visual": "Что зритель видит в первые 3 секунды — необычно, динамично, конкретно",\n'+
+    '  "hook_text": "Первая фраза — создаёт незакрытую петлю — одно короткое предложение",\n'+
+    '  "amp_text": "Усиление 2-3 предложения — нагнетаем, обещаем ценность",\n'+
+    '  "amp_scene": "Что показываем в кадре во время усиления",\n'+
+    '  "points": [\n'+
+    '    {"text": "Текст пункта — коротко и ёмко", "scene": "Что именно снимать и показывать"},\n'+
+    '    {"text": "...", "scene": "..."},\n'+
+    '    {"text": "...", "scene": "..."}\n'+
+    '  ],\n'+
+    '  "conclusion": "1-2 предложения — мощная мысль на которую хочется репостить",\n'+
+    '  "conc_scene": "Кадр для вывода",\n'+
+    '  "cta": "Текст призыва или пустая строка",\n'+
+    '  "shoot": ["Совет по съёмке 1", "Совет 2", "Совет 3", "Совет 4"],\n'+
+    '  "edit": ["Совет по монтажу 1", "Совет 2", "Совет 3"],\n'+
+    '  "wide_why": "Почему эта тема интересна широкой аудитории",\n'+
+    '  "payoff": "тип pay-off"\n'+
+    '}';
+}
+
+function generate() {
+  var topic = gval('topicInput');
+  if(!topic){ err('err2','Введи тему'); return; }
+
+  var seed = Math.random().toString(36).substr(2,7);
+  gid('genOv').classList.add('on');
+  var gi=0;
+  genTimer = setInterval(function(){ gid('genMsg').textContent=genMsgs[gi++%genMsgs.length]; },1100);
+
+  callGPT(buildPrompt(seed), 'Ты сценарист вирусного контента. Отвечай только JSON без markdown.', 0.88, function(e,s){
+    clearInterval(genTimer);
+    gid('genOv').classList.remove('on');
+    if(e){ toast('Ошибка: '+e.message); return; }
+    currentScript = s;
+    renderScript(s);
+    goStep(2);
+    toast('✓ Сценарий готов!');
+  });
+}
+
+function regen() {
+  var seed = Math.random().toString(36).substr(2,7);
+  gid('genOv').classList.add('on');
+  var gi=0;
+  genTimer = setInterval(function(){ gid('genMsg').textContent=genMsgs[gi++%genMsgs.length]; },1100);
+
+  callGPT(buildPrompt(seed), 'Ты сценарист вирусного контента. Отвечай только JSON без markdown.', 0.93, function(e,s){
+    clearInterval(genTimer);
+    gid('genOv').classList.remove('on');
+    if(e){ toast('Ошибка: '+e.message); return; }
+    currentScript = s;
+    renderScript(s);
+    toast('✓ Новый вариант готов!');
+  });
+}
+
+// ─── RENDER RESULT ────────────────────────────────
+function renderScript(s) {
+  var topic = gval('topicInput');
+  var dur   = grad('dur') || '60 сек';
+
+  gid('resSub').textContent = topic.length>70 ? topic.substr(0,70)+'…' : topic;
+  gid('resTags').innerHTML =
+    '<div class="res-tag">'+dur+'</div>'+
+    '<div class="res-tag">'+(s.payoff||'pay-off')+'</div>'+
+    '<div class="res-tag">'+(s.points||[]).length+' пункта</div>';
+
+  var sections = [
+    {
+      bg:'rgba(255,77,28,.12)', ico:'⚡', title:'Конфликт в основе истории',
+      body:
+        fb('О ЧЁМ НА САМОМ ДЕЛЕ ЭТОТ РИЛС', s.conflict, 'big accent')+
+        fb('ПОЧЕМУ ЭТО ИНТЕРЕСНО ШИРОКОЙ АУДИТОРИИ', s.wide_why, '')
+    },
+    {
+      bg:'rgba(255,216,77,.12)', ico:'🎣', title:'ХУК — первые 3 секунды',
+      body:
+        fb('ЧТО В КАДРЕ (ВИЗУАЛЬНЫЙ ХУК)', s.hook_visual, '')+
+        fb('ПЕРВАЯ ФРАЗА / ТИТР', '"'+(s.hook_text||'—')+'"', 'big')
+    },
+    {
+      bg:'rgba(255,120,60,.1)', ico:'🔥', title:'УСИЛЕНИЕ — нагнетаем интерес',
+      body:
+        fb('ТЕКСТ', s.amp_text, '')+
+        fbScene('КА ДР / ВСТАВКА', s.amp_scene)
+    },
+    {
+      bg:'rgba(77,142,255,.1)', ico:'📖', title:'РАСКРЫТИЕ — основной контент',
+      body: (s.points||[]).map(function(p,i){
+        return '<div class="pt-block"><div class="pt-num">'+(i+1)+'</div>'+
+          '<div class="pt-text">'+escHtml(p.text||'—')+'</div>'+
+          '<div class="scene-lbl">📷 В КАДРЕ</div>'+
+          '<div class="pt-scene">'+escHtml(p.scene||'—')+'</div></div>';
+      }).join('')
+    },
+    {
+      bg:'rgba(45,216,130,.1)', ico:'💡', title:'ВЫВОД — pay-off',
+      body:
+        fb('ГЛАВНАЯ МЫСЛЬ (то, что захотят репостить)', s.conclusion, 'big green')+
+        fbScene('КАДР ДЛЯ ВЫВОДА', s.conc_scene)
+    }
+  ];
+
+  if(s.cta) sections.push({
+    bg:'rgba(77,142,255,.1)', ico:'📣', title:'ПРИЗЫВ К ДЕЙСТВИЮ',
+    body: '<div class="fb-val big">'+escHtml(s.cta)+'</div>'
+  });
+
+  sections.push({
+    bg:'rgba(255,255,255,.04)', ico:'🎬', title:'СОВЕТЫ ПО СЪЁМКЕ',
+    body: (s.shoot||[]).map(function(t){ return '<div class="tip-row"><div class="tip-dot"></div><div>'+escHtml(t)+'</div></div>'; }).join('')
+  });
+  sections.push({
+    bg:'rgba(45,216,130,.06)', ico:'✂️', title:'МОНТАЖ',
+    body: (s.edit||[]).map(function(t){ return '<div class="tip-row"><div class="tip-dot" style="background:var(--green)"></div><div>'+escHtml(t)+'</div></div>'; }).join('')
+  });
+
+  gid('scriptOut').innerHTML = sections.map(function(sec,idx){
+    return '<div class="ss">'+
+      '<div class="ss-head" onclick="toggleSS('+idx+')">'+
+        '<div class="ss-ico" style="background:'+sec.bg+'">'+sec.ico+'</div>'+
+        '<div class="ss-title">'+sec.title+'</div>'+
+        '<div class="ss-arr" id="arr'+idx+'">▾</div>'+
+      '</div>'+
+      '<div class="ss-body" id="sb'+idx+'">'+sec.body+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+function fb(label, val, cls) {
+  return '<div class="fb"><div class="fb-lbl">'+label+'</div><div class="fb-val '+(cls||'')+'">'+(escHtml(val||'—'))+'</div></div>';
+}
+function fbScene(label, val) {
+  return '<div class="fb"><div class="fb-lbl">'+label+'</div><div class="fb-val"><div class="scene-lbl">📷 В КАДРЕ</div>'+escHtml(val||'—')+'</div></div>';
+}
+
+function toggleSS(i) {
+  var b=gid('sb'+i), a=gid('arr'+i);
+  b.classList.toggle('closed');
+  a.textContent = b.classList.contains('closed') ? '▸' : '▾';
+}
+
+// ─── PDF ──────────────────────────────────────────
+function makePDF() {
+  if(!currentScript){ toast('Сначала сгенерируй сценарий'); return; }
+  // Load jsPDF on demand
+  if(!window.jspdf) {
+    toast('Загружаю PDF-библиотеку...');
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = function(){ buildPDF(); };
+    s.onerror = function(){ toast('Ошибка загрузки PDF. Проверь интернет.'); };
+    document.head.appendChild(s);
+  } else {
+    buildPDF();
+  }
+}
+
+function buildPDF() {
+  if(!currentScript){ toast('Сначала сгенерируй сценарий'); return; }
+  var s = currentScript;
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({unit:'mm',format:'a4'});
+  var W=210, M=17, TW=W-M*2, y=16;
+
+  function np(){ doc.addPage(); y=16; }
+  function cy(n){ if(y+(n||18)>282) np(); }
+  function tf(st,sz){ doc.setFont('helvetica',st); doc.setFontSize(sz); }
+  function tc(r,g,b){ doc.setTextColor(r,g,b); }
+  function bx(x,yy,w,h,fr,fg,fb_,sr,sg,sb){ doc.setFillColor(fr,fg,fb_); doc.setDrawColor(sr||200,sg||198,sb||190); doc.setLineWidth(0.2); doc.roundedRect(x,yy,w,h,2,2,'FD'); }
+  function wt(txt,x,yy,mw,sz,st,cr,cg,cb){ tf(st||'normal',sz||10); tc(cr||30,cg||28,cb||20); var ls=doc.splitTextToSize(txt||'—',mw); doc.text(ls,x,yy); return ls.length*(((sz||10)*0.38)+1.4); }
+  function fld(lbl,val,accent){
+    cy(18); tf('bold',8); tc(130,128,120); doc.text(lbl.toUpperCase(),M,y); y+=5;
+    var ls=doc.splitTextToSize(val||'—',TW-8); var bh=ls.length*5.5+8; cy(bh);
+    bx(M,y,TW,bh, accent?255:248, accent?248:247, accent?224:243, 210,208,198);
+    tf('normal',10); tc(25,23,18); ls.forEach(function(l,i){ doc.text(l,M+4,y+5+i*5.5); }); y+=bh+5;
+  }
+  function sh(label,ico,r,g,b){ cy(12); doc.setFillColor(r||240,g||238,b||232); doc.rect(M,y,TW,8,'F'); tf('bold',9); tc(50,48,40); doc.text(ico+'  '+label,M+3,y+5.5); y+=12; }
+
+  // Cover
+  doc.setFillColor(13,13,15); doc.rect(0,0,210,297,'F');
+  doc.setFillColor(255,77,28); doc.rect(0,0,9,297,'F');
+  tf('bold',34); tc(255,255,255); doc.text('СЦЕНАРИЙ',16,48);
+  tf('bold',34); tc(255,77,28); doc.text('РИЛСА',16,64);
+  tf('normal',12); tc(144,144,160);
+  var tl=doc.splitTextToSize(gval('topicInput')||'',TW-8); tl.forEach(function(l,i){ doc.text(l,16,84+i*7); });
+  tf('normal',8); tc(90,88,100); doc.text('Reels Script AI · '+new Date().toLocaleDateString('ru-RU'),16,284);
+  tf('bold',8); tc(255,77,28); doc.text('REELS SCRIPT AI',5,155,{angle:90});
+
+  // Page 2
+  np();
+  tf('bold',17); tc(25,23,18); doc.text('СЦЕНАРИЙ РИЛСА',M,y); y+=6;
+  doc.setDrawColor(210,208,198); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=8;
+  tf('normal',9); tc(100,98,90);
+  doc.text('Тема: '+(gval('topicInput')||'').substr(0,80),M,y); y+=5;
+  doc.text('Формат: '+(grad('fmt')||'—')+'  ·  Длина: '+(grad('dur')||'—'),M,y); y+=9;
+
+  sh('КОНФЛИКТ В ОСНОВЕ ИСТОРИИ','⚡',255,240,232);
+  fld('О ЧЁМ НА САМОМ ДЕЛЕ ЭТОТ РИЛС', s.conflict, true);
+  fld('ПОЧЕМУ ЭТО ИНТЕРЕСНО ШИРОКОЙ АУДИТОРИИ', s.wide_why, false);
+
+  sh('ХУК — ПЕРВЫЕ 3 СЕКУНДЫ','🎣',255,252,228);
+  fld('ЧТО В КАДРЕ (ВИЗУАЛЬНЫЙ ХУК)', s.hook_visual, false);
+  fld('ПЕРВАЯ ФРАЗА / ТИТР', '"'+(s.hook_text||'—')+'"', true);
+
+  sh('УСИЛЕНИЕ','🔥',255,238,225);
+  fld('ТЕКСТ', s.amp_text, false);
+  fld('КАДР / ВСТАВКА', s.amp_scene, false);
+
+  sh('РАСКРЫТИЕ','📖',228,238,255);
+  (s.points||[]).forEach(function(p,i){
+    cy(22); tf('bold',9); tc(30,28,20); doc.text('ПУНКТ '+(i+1),M,y); y+=5;
+    fld('ТЕКСТ', p.text, false);
+    fld('КАДР', p.scene, false);
+    y+=2;
+  });
+
+  sh('ВЫВОД — PAY-OFF','💡',228,248,236);
+  fld('ГЛАВНАЯ МЫСЛЬ', s.conclusion, true);
+  fld('КАДР', s.conc_scene, false);
+
+  if(s.cta){ sh('ПРИЗЫВ К ДЕЙСТВИЮ','📣',228,236,255); fld('ТЕКСТ', s.cta, true); }
+
+  cy(16); sh('СОВЕТЫ ПО СЪЁМКЕ','🎬',242,240,234);
+  (s.shoot||[]).forEach(function(t){
+    cy(12); var h=wt('• '+t,M+4,y+4,TW-8,9); bx(M,y,TW,h+6,248,247,243,210,208,198); y+=h+10;
+  });
+
+  cy(16); sh('МОНТАЖ','✂️',232,246,238);
+  (s.edit||[]).forEach(function(t){
+    cy(12); var h=wt('• '+t,M+4,y+4,TW-8,9); bx(M,y,TW,h+6,232,246,238,180,220,200); y+=h+10;
+  });
+
+  // Checklist
+  np();
+  tf('bold',15); tc(25,23,18); doc.text('ЧЕКЛИСТ 10 ПРАВИЛ',M,y); y+=6;
+  doc.setDrawColor(210,208,198); doc.setLineWidth(0.3); doc.line(M,y,W-M,y); y+=10;
+  var rules=['Тема широкая — интересна миллионам, не только профессионалам','В основе — конфликт или противоречие, а не просто набор фактов','Хук цепляет с первых 3 секунд: необычный визуал + триггерная фраза','Строгая структура: хук → усиление → раскрытие → вывод → CTA','Только короткие предложения — ноль сложных терминов','На каждый тезис — отдельная визуальная вставка','Pay-off: зритель получает реальную ценность, а не обещание','Есть причина подписаться прямо сейчас','Контент подходит для TikTok, YouTube Shorts, ВК Клипов','Единый тон и формат на протяжении всего рилса'];
+  rules.forEach(function(r,i){
+    cy(11); bx(M,y,TW,9,248,247,243,210,208,198);
+    doc.setFillColor(232,230,224); doc.rect(M,y,7,9,'F');
+    tf('bold',9); tc(80,78,70); doc.text(''+(i+1),M+2.8,y+6.2);
+    tf('normal',9); tc(25,23,18); doc.text(r,M+10,y+6.2); y+=12;
+  });
+
+  var pn=doc.getNumberOfPages();
+  for(var i=2;i<=pn;i++){ doc.setPage(i); tf('normal',8); tc(150,148,140); doc.text('Reels Script AI · стр '+i+'/'+pn,M,290); }
+
+  doc.save('reels-script-'+Date.now()+'.pdf');
+  toast('✓ PDF сохранён');
+}
+</script>
+</body>
+</html>

@@ -661,10 +661,9 @@ textarea { min-height:120px; }
       <div class="nav-lock">PRO</div>
     </div>
 
-    <div class="nav-item locked">
+    <div class="nav-item" onclick="switchTool('reels')">
       <div class="nav-item-icon">🎬</div>
-      <div class="nav-item-text">Reels Продюсер<small>4 формата</small></div>
-      <div class="nav-lock">PRO</div>
+      <div class="nav-item-text">Reels Продюсер<small>Сценарий + раскадровка</small></div>
     </div>
 
     <div class="nav-item locked">
@@ -1454,7 +1453,13 @@ function resetProcSteps() {
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-function switchTool(t) { /* для будущей навигации */ }
+function switchTool(t) {
+  if (t === 'reels') {
+    window.open('reels.html', '_blank');
+    return;
+  }
+  // будущие инструменты
+}
 </script>
 </body>
 </html>
