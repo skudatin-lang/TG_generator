@@ -363,6 +363,7 @@ textarea{resize:vertical;min-height:96px;line-height:1.6;}
 .ss{
   background:var(--s1);border:1px solid var(--border);
   border-radius:var(--r);margin-bottom:12px;overflow:hidden;
+  border-left: 3px solid var(--acc, var(--border));
 }
 .ss-head{
   padding:18px 20px;display:flex;align-items:center;gap:12px;
@@ -372,6 +373,7 @@ textarea{resize:vertical;min-height:96px;line-height:1.6;}
 .ss-head:hover{background:var(--s2);}
 .ss-ico{
   width:40px;height:40px;border-radius:9px;
+  background:rgba(255,255,255,.06);
   display:flex;align-items:center;justify-content:center;
   font-size:20px;flex-shrink:0;
 }
@@ -430,6 +432,57 @@ textarea{resize:vertical;min-height:96px;line-height:1.6;}
   font-size:15px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.4);
 }
 .toast.on{display:block;animation:up .2s ease;}
+
+/* ─── PRODUCTION BLOCK ─── */
+.prod-block {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.prod-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.prod-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: var(--r2);
+  margin-bottom: 8px;
+}
+.prod-row:last-child { margin-bottom: 0; }
+.prod-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.prod-ico.cam { background: rgba(255,216,77,.12); }
+.prod-ico.cut { background: rgba(45,216,130,.12); }
+.prod-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 3px;
+}
+.prod-val {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.55;
+}
+.prod-row:has(.cam) { background: rgba(255,216,77,.04); border: 1px solid rgba(255,216,77,.1); }
+.prod-row:has(.cut) { background: rgba(45,216,130,.04); border: 1px solid rgba(45,216,130,.1); }
 
 /* ─── EXAMPLE CHIPS ─── */
 .ex-chip {
@@ -999,26 +1052,36 @@ function buildPrompt(seed) {
     'ВЫВОД и CTA — органично ведут к продукту автора, не как реклама, а как логичное продолжение истории.\n'+
     'PAY-OFF = конкретная ценность которую хочется сохранить и репостить.\n\n'+
     'СТРУКТУРА: хук (3 сек) → усиление → 3-4 пункта раскрытия → вывод → CTA\n'+
-    'Каждый пункт = отдельный кадр.\n\n'+
+    'Каждый пункт = отдельный кадр. К каждому блоку — конкретные инструкции по съёмке и монтажу.\n\n'+
     'Верни ТОЛЬКО JSON:\n'+
     '{\n'+
     '  "conflict": "Конфликт в основе истории",\n'+
-    '  "hook_visual": "Что в кадре первые 3 секунды — конкретно и необычно",\n'+
-    '  "hook_text": "Первая фраза — личная история или провокация, не рекламный вопрос",\n'+
-    '  "amp_text": "Усиление — нагнетаем ставки, 2-3 коротких предложения",\n'+
-    '  "amp_scene": "Кадр усиления",\n'+
+    '  "wide_why": "Почему широкой аудитории это интересно",\n'+
+    '  "hook": {\n'+
+    '    "visual": "Что в кадре первые 3 секунды — конкретно и необычно",\n'+
+    '    "text": "Первая фраза — личная история или провокация, не рекламный вопрос",\n'+
+    '    "shoot": "Как именно снимать этот момент — ракурс, движение камеры, свет",\n'+
+    '    "cut": "Как монтировать переход из хука в следующий блок — тип склейки, темп"\n'+
+    '  },\n'+
+    '  "amp": {\n'+
+    '    "text": "Усиление — нагнетаем ставки, 2-3 коротких предложения",\n'+
+    '    "scene": "Что показываем в кадре",\n'+
+    '    "shoot": "Как снимать этот момент",\n'+
+    '    "cut": "Переход к раскрытию"\n'+
+    '  },\n'+
     '  "points": [\n'+
-    '    {"text": "Пункт раскрытия — коротко", "scene": "Конкретный кадр"},\n'+
-    '    {"text": "...", "scene": "..."},\n'+
-    '    {"text": "...", "scene": "..."}\n'+
+    '    {"text": "Пункт раскрытия", "scene": "Кадр", "shoot": "Как снимать", "cut": "Переход к следующему пункту"},\n'+
+    '    {"text": "...", "scene": "...", "shoot": "...", "cut": "..."},\n'+
+    '    {"text": "...", "scene": "...", "shoot": "...", "cut": "..."}\n'+
     '  ],\n'+
-    '  "conclusion": "Мощная мысль — на которую хочется нажать репост",\n'+
-    '  "conc_scene": "Кадр вывода",\n'+
-    '  "cta": "Призыв или пустая строка",\n'+
-    '  "shoot": ["Совет по съёмке 1","Совет 2","Совет 3","Совет 4"],\n'+
-    '  "edit": ["Совет по монтажу 1","Совет 2","Совет 3"],\n'+
-    '  "wide_why": "Почему широкой аудитории это интересно — не только целевой",\n'+
-    '  "payoff": "тип pay-off"\n'+
+    '  "conclusion": {\n'+
+    '    "text": "Мощная мысль — на которую хочется нажать репост",\n'+
+    '    "scene": "Кадр вывода",\n'+
+    '    "shoot": "Как снимать финальный кадр",\n'+
+    '    "cut": "Как завершить монтаж — финальный эффект или стоп-кадр"\n'+
+    '  },\n'+
+    '  "cta": "Призыв к действию или пустая строка",\n'+
+    '  "payoff": "тип pay-off — шок/польза/эмоция/инсайт"\n'+
     '}';
 }
 
@@ -1062,67 +1125,78 @@ function regen() {
 function renderScript(s) {
   var topic = gval('topicInput');
   var dur   = grad('dur') || '60 сек';
+  var pts   = s.points || [];
+  var hook  = s.hook || {};
+  var amp   = s.amp  || {};
+  var conc  = s.conclusion || {};
 
+  // header tags
   gid('resSub').textContent = topic.length>70 ? topic.substr(0,70)+'…' : topic;
   gid('resTags').innerHTML =
     '<div class="res-tag">'+dur+'</div>'+
     '<div class="res-tag">'+(s.payoff||'pay-off')+'</div>'+
-    '<div class="res-tag">'+(s.points||[]).length+' пункта</div>';
+    '<div class="res-tag">'+pts.length+' пункта</div>';
+
+  function prod(shoot, cut) {
+    if(!shoot && !cut) return '';
+    return '<div class="prod-block">'+
+      '<div class="prod-title">🎬 ПРОДАКШЕН</div>'+
+      (shoot ? '<div class="prod-row"><div class="prod-ico cam">📷</div><div><div class="prod-lbl">СЪЁМКА</div><div class="prod-val">'+escHtml(shoot)+'</div></div></div>' : '')+
+      (cut   ? '<div class="prod-row"><div class="prod-ico cut">✂️</div><div><div class="prod-lbl">МОНТАЖ / ПЕРЕХОД</div><div class="prod-val">'+escHtml(cut)+'</div></div></div>' : '')+
+    '</div>';
+  }
 
   var sections = [
     {
-      bg:'rgba(255,77,28,.12)', ico:'⚡', title:'Конфликт в основе истории',
+      ico:'⚡', title:'Конфликт в основе истории', accent:'var(--accent)',
       body:
         fb('О ЧЁМ НА САМОМ ДЕЛЕ ЭТОТ РИЛС', s.conflict, 'big accent')+
         fb('ПОЧЕМУ ЭТО ИНТЕРЕСНО ШИРОКОЙ АУДИТОРИИ', s.wide_why, '')
     },
     {
-      bg:'rgba(255,216,77,.12)', ico:'🎣', title:'ХУК — первые 3 секунды',
+      ico:'🎣', title:'ХУК — первые 3 секунды', accent:'var(--yellow)',
       body:
-        fb('ЧТО В КАДРЕ (ВИЗУАЛЬНЫЙ ХУК)', s.hook_visual, '')+
-        fb('ПЕРВАЯ ФРАЗА / ТИТР', '"'+(s.hook_text||'—')+'"', 'big')
+        fbScene('ЧТО В КАДРЕ', hook.visual || s.hook_visual)+
+        fb('ПЕРВАЯ ФРАЗА / ТИТР', '"'+(hook.text || s.hook_text || '—')+'"', 'big')+
+        prod(hook.shoot, hook.cut)
     },
     {
-      bg:'rgba(255,120,60,.1)', ico:'🔥', title:'УСИЛЕНИЕ — нагнетаем интерес',
+      ico:'🔥', title:'УСИЛЕНИЕ — нагнетаем интерес', accent:'#ff6535',
       body:
-        fb('ТЕКСТ', s.amp_text, '')+
-        fbScene('КА ДР / ВСТАВКА', s.amp_scene)
+        fb('ТЕКСТ', amp.text || s.amp_text, '')+
+        fbScene('КАДР / ВСТАВКА', amp.scene || s.amp_scene)+
+        prod(amp.shoot, amp.cut)
     },
     {
-      bg:'rgba(77,142,255,.1)', ico:'📖', title:'РАСКРЫТИЕ — основной контент',
-      body: (s.points||[]).map(function(p,i){
-        return '<div class="pt-block"><div class="pt-num">'+(i+1)+'</div>'+
+      ico:'📖', title:'РАСКРЫТИЕ — основной контент', accent:'var(--blue)',
+      body: pts.map(function(p,i){
+        return '<div class="pt-block">'+
+          '<div class="pt-num">'+(i+1)+'</div>'+
           '<div class="pt-text">'+escHtml(p.text||'—')+'</div>'+
           '<div class="scene-lbl">📷 В КАДРЕ</div>'+
-          '<div class="pt-scene">'+escHtml(p.scene||'—')+'</div></div>';
+          '<div class="pt-scene">'+escHtml(p.scene||'—')+'</div>'+
+          prod(p.shoot, p.cut)+
+        '</div>';
       }).join('')
     },
     {
-      bg:'rgba(45,216,130,.1)', ico:'💡', title:'ВЫВОД — pay-off',
+      ico:'💡', title:'ВЫВОД — pay-off', accent:'var(--green)',
       body:
-        fb('ГЛАВНАЯ МЫСЛЬ (то, что захотят репостить)', s.conclusion, 'big green')+
-        fbScene('КАДР ДЛЯ ВЫВОДА', s.conc_scene)
+        fb('ГЛАВНАЯ МЫСЛЬ (то, что захотят репостить)', conc.text || s.conclusion_text || (typeof s.conclusion==='string'?s.conclusion:''), 'big green')+
+        fbScene('КАДР ДЛЯ ВЫВОДА', conc.scene || s.conc_scene)+
+        prod(conc.shoot, conc.cut)
     }
   ];
 
   if(s.cta) sections.push({
-    bg:'rgba(77,142,255,.1)', ico:'📣', title:'ПРИЗЫВ К ДЕЙСТВИЮ',
-    body: '<div class="fb-val big">'+escHtml(s.cta)+'</div>'
-  });
-
-  sections.push({
-    bg:'rgba(255,255,255,.04)', ico:'🎬', title:'СОВЕТЫ ПО СЪЁМКЕ',
-    body: (s.shoot||[]).map(function(t){ return '<div class="tip-row"><div class="tip-dot"></div><div>'+escHtml(t)+'</div></div>'; }).join('')
-  });
-  sections.push({
-    bg:'rgba(45,216,130,.06)', ico:'✂️', title:'МОНТАЖ',
-    body: (s.edit||[]).map(function(t){ return '<div class="tip-row"><div class="tip-dot" style="background:var(--green)"></div><div>'+escHtml(t)+'</div></div>'; }).join('')
+    ico:'📣', title:'ПРИЗЫВ К ДЕЙСТВИЮ', accent:'var(--blue)',
+    body: '<div class="fb-val big" style="font-size:20px;padding:18px;">'+escHtml(s.cta)+'</div>'
   });
 
   gid('scriptOut').innerHTML = sections.map(function(sec,idx){
-    return '<div class="ss">'+
+    return '<div class="ss" style="--acc:'+sec.accent+'">'+
       '<div class="ss-head" onclick="toggleSS('+idx+')">'+
-        '<div class="ss-ico" style="background:'+sec.bg+'">'+sec.ico+'</div>'+
+        '<div class="ss-ico">'+sec.ico+'</div>'+
         '<div class="ss-title">'+sec.title+'</div>'+
         '<div class="ss-arr" id="arr'+idx+'">▾</div>'+
       '</div>'+
@@ -1135,7 +1209,8 @@ function fb(label, val, cls) {
   return '<div class="fb"><div class="fb-lbl">'+label+'</div><div class="fb-val '+(cls||'')+'">'+(escHtml(val||'—'))+'</div></div>';
 }
 function fbScene(label, val) {
-  return '<div class="fb"><div class="fb-lbl">'+label+'</div><div class="fb-val"><div class="scene-lbl">📷 В КАДРЕ</div>'+escHtml(val||'—')+'</div></div>';
+  return '<div class="fb"><div class="fb-lbl">'+label+'</div>'+
+    '<div class="fb-val"><span class="scene-lbl">📷 В КАДРЕ</span> '+escHtml(val||'—')+'</div></div>';
 }
 
 function toggleSS(i) {
